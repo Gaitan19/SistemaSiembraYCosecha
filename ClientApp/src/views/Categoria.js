@@ -21,7 +21,6 @@ import {
   exportToExcel,
   applySearchFilter,
 } from "../utils/exportHelpers";
-import { useSignalR } from "../context/SignalRProvider";
 
 const modeloCategoria = {
   idCategoria: 0,
@@ -38,7 +37,6 @@ const Categoria = () => {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [verModal, setVerModal] = useState(false);
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
-  const { subscribe } = useSignalR();
 
   const handleChange = (e) => {
     let value =
@@ -130,88 +128,9 @@ const Categoria = () => {
 
   useEffect(() => {
     obtenerCategorias();
+  }, []);
 
-    // Set up SignalR listeners for real-time updates
-    const unsubscribeCreated = subscribe(
-      "CategoriaCreated",
-      (nuevaCategoria) => {
-        setCategorias((prev) => {
-          const newData = [nuevaCategoria, ...prev];
-          // Apply current filters to new data
-          const filtered = applyFilters(newData, searchTerm, statusFilter);
-          setFilteredCategorias(filtered);
-          return newData;
-        });
-        Swal.fire({
-          position: "top-end",
-          icon: "info",
-          title: "Nueva categoría agregada",
-          text: `Se agregó: ${nuevaCategoria.descripcion}`,
-          showConfirmButton: false,
-          timer: 3000,
-          toast: true,
-        });
-      }
-    );
-
-    const unsubscribeUpdated = subscribe(
-      "CategoriaUpdated",
-      (categoriaActualizada) => {
-        setCategorias((prev) => {
-          const newData = prev.map((cat) =>
-            cat.idCategoria === categoriaActualizada.idCategoria
-              ? categoriaActualizada
-              : cat
-          );
-          // Apply current filters to new data
-          const filtered = applyFilters(newData, searchTerm, statusFilter);
-          setFilteredCategorias(filtered);
-          return newData;
-        });
-        Swal.fire({
-          position: "top-end",
-          icon: "info",
-          title: "Categoría actualizada",
-          text: `Se actualizó: ${categoriaActualizada.descripcion}`,
-          showConfirmButton: false,
-          timer: 3000,
-          toast: true,
-        });
-      }
-    );
-
-    const unsubscribeDeleted = subscribe("CategoriaDeleted", (id) => {
-      setCategorias((prev) => {
-        const newData = prev.map((cat) =>
-          cat.idCategoria === id ? { ...cat, esActivo: false } : cat
-        );
-        // Apply current filters to new data
-        const filtered = applyFilters(newData, searchTerm, statusFilter);
-        setFilteredCategorias(filtered);
-        return newData;
-      });
-
-      Swal.fire({
-        position: "top-end",
-        icon: "info",
-        title: "Categoría eliminada",
-        text: "Una categoría fue eliminada",
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true,
-      });
-    });
-
-    // Cleanup function
-    return () => {
-      unsubscribeCreated();
-      unsubscribeUpdated();
-      unsubscribeDeleted();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscribe]); // Removed searchTerm dependency
-
-  // Separate useEffect to handle search term and status filter changes
+  // Apply search term and status filter changes
   useEffect(() => {
     const filtered = applyFilters(categorias, searchTerm, statusFilter);
     setFilteredCategorias(filtered);

@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import NavBar from './componentes/NavBar'
-import ConnectionStatus from './componentes/ConnectionStatus'
 import { Link } from 'react-router-dom';
 import { UserContext } from './context/UserProvider';
 import { usePermissions } from './context/PermissionProvider';
@@ -119,8 +118,6 @@ const App = () => {
                 </footer>
             </div>
 
-            {/* SignalR Connection Status Indicator */}
-            <ConnectionStatus />
                
         </>
         )

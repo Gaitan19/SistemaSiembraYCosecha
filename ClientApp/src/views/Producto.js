@@ -21,7 +21,6 @@ import {
   exportToExcel,
   applySearchFilter,
 } from "../utils/exportHelpers";
-import { useSignalR } from "../context/SignalRProvider"; // Importa el hook de SignalR
 
 const modeloProducto = {
   idProducto: 0,
@@ -47,7 +46,6 @@ const Producto = () => {
   const [proveedores, setProveedores] = useState([]);
   const [verModal, setVerModal] = useState(false);
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
-  const { subscribe } = useSignalR(); // Obtiene la función subscribe del contexto
 
   const handleChange = (e) => {
     let value;
@@ -195,90 +193,7 @@ const Producto = () => {
     obtenerProveedores();
     obtenerProductos();
 
-    // Configurar suscripciones a eventos de SignalR
-    const unsubscribeCreated = subscribe("ProductoCreated", (nuevoProducto) => {
-      // Agrega el nuevo producto al inicio de la lista
-      setProductos((prev) => {
-        const newData = [nuevoProducto, ...prev];
-        // Apply current filters to new data
-        const filtered = applyFilters(newData, searchTerm, statusFilter);
-        setFilteredProductos(filtered);
-        return newData;
-      });
-
-      // Muestra notificación toast
-      Swal.fire({
-        position: "top-end",
-        icon: "info",
-        title: "Nuevo producto agregado",
-        text: `Se agregó: ${nuevoProducto.descripcion}`,
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true,
-      });
-    });
-
-    const unsubscribeUpdated = subscribe(
-      "ProductoUpdated",
-      (productoActualizado) => {
-        // Actualiza el producto en la lista
-        setProductos((prev) => {
-          const newData = prev.map((prod) =>
-            prod.idProducto === productoActualizado.idProducto
-              ? productoActualizado
-              : prod
-          );
-          // Apply current filters to new data
-          const filtered = applyFilters(newData, searchTerm, statusFilter);
-          setFilteredProductos(filtered);
-          return newData;
-        });
-
-        // Muestra notificación toast
-        Swal.fire({
-          position: "top-end",
-          icon: "info",
-          title: "Producto actualizado",
-          text: `Se actualizó: ${productoActualizado.descripcion}`,
-          showConfirmButton: false,
-          timer: 3000,
-          toast: true,
-        });
-      }
-    );
-
-    const unsubscribeDeleted = subscribe("ProductoDeleted", (id) => {
-      // Marca el producto como inactivo
-      setProductos((prev) => {
-        const newData = prev.map((prod) =>
-          prod.idProducto === id ? { ...prod, esActivo: false } : prod
-        );
-        // Apply current filters to new data
-        const filtered = applyFilters(newData, searchTerm, statusFilter);
-        setFilteredProductos(filtered);
-        return newData;
-      });
-
-      // Muestra notificación toast
-      Swal.fire({
-        position: "top-end",
-        icon: "info",
-        title: "Producto eliminado",
-        text: "Un producto fue eliminado",
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true,
-      });
-    });
-
-    // Limpieza de suscripciones al desmontar el componente
-    return () => {
-      unsubscribeCreated();
-      unsubscribeUpdated();
-      unsubscribeDeleted();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscribe]); // Removed searchTerm dependency
+  }, []);
 
   // Separate useEffect to handle search term and status filter changes
   useEffect(() => {
@@ -433,7 +348,7 @@ const Producto = () => {
       }
 
       if (response.ok) {
-        // No necesitamos obtenerProductos porque SignalR actualizará en tiempo real
+        await obtenerProductos();
         setProducto(modeloProducto);
         setVerModal(!verModal);
 
@@ -471,7 +386,7 @@ const Producto = () => {
         })
           .then((response) => {
             if (response.ok) {
-              // No es necesario obtenerProductos porque SignalR actualizará
+              obtenerProductos();
               Swal.fire("Eliminado!", "El producto fue eliminado.", "success");
             } else {
               response.text().then((errorText) => {

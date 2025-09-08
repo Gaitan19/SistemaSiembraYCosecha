@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@microsoft/signalr": "^8.0.7",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.6.0",
     "crypto-js": "^4.2.0",
