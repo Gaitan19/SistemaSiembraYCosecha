@@ -185,7 +185,7 @@ const Venta = () => {
           }
         }
       },
-      allowOutsideClick: () => !Swal.isLoading(),
+      allowOutsideClick: false,
     });
   };
 
@@ -271,7 +271,9 @@ const Venta = () => {
           }
         }
       },
-      allowOutsideClick: () => !Swal.isLoading(),
+      allowOutsideClick: function() { 
+        return !Swal.isLoading(); 
+      },
     });
   };
 
