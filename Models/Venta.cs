@@ -28,11 +28,7 @@ namespace ReactVentas.Models
         /// </summary>
         public string? NumeroDocumento { get; set; }
 
-        /// <summary>
-        /// Gets or sets the type of document used in the sale (e.g., invoice, receipt).
-        /// Optional field.
-        /// </summary>
-        public string? TipoDocumento { get; set; }
+
 
         /// <summary>
         /// Gets or sets the date and time when the sale was registered.
@@ -58,17 +54,9 @@ namespace ReactVentas.Models
         /// </summary>
         public string? NombreCliente { get; set; }
 
-        /// <summary>
-        /// Gets or sets the subtotal amount for the sale, before taxes.
-        /// Optional field.
-        /// </summary>
-        public decimal? SubTotal { get; set; }
 
-        /// <summary>
-        /// Gets or sets the total amount of taxes for the sale.
-        /// Optional field.
-        /// </summary>
-        public decimal? ImpuestoTotal { get; set; }
+
+
 
         /// <summary>
         /// Gets or sets the total amount for the sale, including taxes.

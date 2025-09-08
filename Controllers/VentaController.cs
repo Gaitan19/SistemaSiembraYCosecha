@@ -34,12 +34,10 @@ namespace ReactVentas.Controllers
             try
             {
                 lista = await _context.Productos
-                .Where(p => p.EsActivo == true && string.Concat(p.Codigo.ToLower(), p.Marca.ToLower(), p.Descripcion.ToLower(),p.Nombre.ToLower()).Contains(busqueda.ToLower()))
+                .Where(p => p.EsActivo == true && string.Concat(p.Descripcion.ToLower(),p.Nombre.ToLower()).Contains(busqueda.ToLower()))
                 .Select(p => new DtoProducto()
                 {
                     IdProducto = p.IdProducto,
-                    Codigo = p.Codigo,
-                    Marca = p.Marca,
                     Nombre = p.Nombre,
                     Descripcion = p.Descripcion,
                     Precio = p.Precio
@@ -88,9 +86,7 @@ namespace ReactVentas.Controllers
                     };
                     cmd.Parameters.Add("documentoCliente", SqlDbType.VarChar, 40).Value = request.documentoCliente;
                     cmd.Parameters.Add("nombreCliente", SqlDbType.VarChar, 40).Value = request.nombreCliente;
-                    cmd.Parameters.Add("tipoDocumento", SqlDbType.VarChar, 50).Value = request.tipoDocumento;
                     cmd.Parameters.Add("idUsuario", SqlDbType.Int).Value = request.idUsuario;
-                    cmd.Parameters.Add("subTotal", SqlDbType.Decimal).Value = request.subTotal;
                     cmd.Parameters.Add("impuestoTotal", SqlDbType.Decimal).Value = request.igv;
                     cmd.Parameters.Add("total", SqlDbType.Decimal).Value = request.total;
                     cmd.Parameters.Add("productos", SqlDbType.Xml).Value = productos.ToString();
@@ -144,13 +140,10 @@ namespace ReactVentas.Controllers
                         {
                             FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
                             NumeroDocumento = v.NumeroDocumento,
-                            TipoDocumento = v.TipoDocumento,
                             DocumentoCliente = v.DocumentoCliente,
                             NumeroRuc = v.NumeroRuc,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
-                            SubTotal = v.SubTotal.ToString(),
-                            Impuesto = v.ImpuestoTotal.ToString(),
                             Total = v.Total.ToString(),
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
@@ -175,12 +168,9 @@ namespace ReactVentas.Controllers
                         {
                             FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
                             NumeroDocumento = v.NumeroDocumento,
-                            TipoDocumento = v.TipoDocumento,
                             DocumentoCliente = v.DocumentoCliente,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
-                            SubTotal = v.SubTotal.ToString(),
-                            Impuesto = v.ImpuestoTotal.ToString(),
                             Total = v.Total.ToString(),
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
@@ -227,11 +217,8 @@ namespace ReactVentas.Controllers
                                {
                                    FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
                                    NumeroDocumento = v.NumeroDocumento,
-                                   TipoDocumento = v.TipoDocumento,
                                    DocumentoCliente = v.DocumentoCliente,
                                    NombreCliente = v.NombreCliente,
-                                   SubTotalVenta = v.SubTotal.ToString(),
-                                   ImpuestoTotalVenta = v.ImpuestoTotal.ToString(),
                                    TotalVenta = v.Total.ToString(),
                                    Producto = p.Descripcion,
                                    Cantidad = d.Cantidad.ToString(),
