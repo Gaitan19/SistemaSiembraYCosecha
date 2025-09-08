@@ -138,12 +138,18 @@ namespace ReactVentas.Controllers
                         .Select(v => new DtoHistorialVenta()
                         {
                             FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
+                            HoraRegistro = v.FechaRegistro.Value.ToString("HH:mm:ss"),
+
                             NumeroDocumento = v.NumeroDocumento,
                             DocumentoCliente = v.DocumentoCliente,
                             NumeroRuc = v.NumeroRuc,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
                             Total = v.Total.ToString(),
+                            TipoDinero = v.TipoDinero,
+                            TipoPago = v.TipoPago,
+                            Vuelto = v.Vuelto,
+                            MontoPago = v.MontoPago,
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
                                 Producto = d.IdProductoNavigation.Nombre,
@@ -166,11 +172,16 @@ namespace ReactVentas.Controllers
                         .Select(v => new DtoHistorialVenta()
                         {
                             FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
+                            HoraRegistro = v.FechaRegistro.Value.ToString("HH:mm:ss"),
                             NumeroDocumento = v.NumeroDocumento,
                             DocumentoCliente = v.DocumentoCliente,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
                             Total = v.Total.ToString(),
+                            TipoDinero = v.TipoDinero,
+                            TipoPago = v.TipoPago,
+                            Vuelto = v.Vuelto,
+                            MontoPago = v.MontoPago,
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
                                 Producto = d.IdProductoNavigation.Nombre,

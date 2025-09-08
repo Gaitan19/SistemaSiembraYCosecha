@@ -260,7 +260,6 @@ const HistorialVenta = () => {
                       <tr>
                         <th>Fecha Registro</th>
                         <th>Numero Venta</th>
-                        <th>Tipo Documento</th>
                         <th>Documento Cliente</th>
                         <th>Nombre Cliente</th>
                         <th>Total</th>
@@ -279,7 +278,6 @@ const HistorialVenta = () => {
                           <tr key={item.numeroDocumento}>
                             <td>{item.fechaRegistro}</td>
                             <td>{item.numeroDocumento}</td>
-                            <td>{item.tipoDocumento}</td>
                             <td>{item.documentoCliente}</td>
                             <td>{item.nombreCliente}</td>
                             <td>C${item.total}</td>
@@ -375,6 +373,51 @@ const HistorialVenta = () => {
               </FormGroup>
             </Col>
           </Row>
+           <Row>
+            <Col sm={4}>
+              <FormGroup>
+                <Label>Tipo Pago:</Label>
+                <Input
+                  bsSize="sm"
+                  disabled
+                  value={detalleVenta.tipoPago || "N/A"}
+                />
+              </FormGroup>
+            </Col>
+            <Col sm={4}>
+              <FormGroup>
+                <Label>Moneda:</Label>
+                <Input
+                  bsSize="sm"
+                  disabled
+                  value={detalleVenta.tipoDinero || "N/A"}
+                />
+              </FormGroup>
+            </Col>
+
+            <Col sm={4}>
+              <FormGroup>
+                <Label>Monto Pago:</Label>
+                <Input
+                  bsSize="sm"
+                  disabled
+                  value={`${detalleVenta.tipoDinero === 'Cordobas' ? 'C$' : '$'}${detalleVenta.montoPago || "N/A"}`}
+                />
+              </FormGroup>
+            </Col>
+          </Row>
+          <Row>
+            <Col sm={4}>
+              <FormGroup>
+                <Label>Monto Vuelto:</Label>
+                <Input
+                  bsSize="sm"
+                  disabled
+                  value={`C$${detalleVenta.vuelto || "N/A"}`}
+                />
+              </FormGroup>
+            </Col>
+          </Row>
           <Table striped responsive size="sm">
             <thead>
               <tr>
@@ -406,16 +449,7 @@ const HistorialVenta = () => {
             </tbody>
           </Table>
           <Row>
-            <Col sm={4}>
-              <FormGroup>
-                <Label>Sub Total:</Label>
-                <Input
-                  bsSize="sm"
-                  disabled
-                  value={`C$${detalleVenta.subTotal}`}
-                />
-              </FormGroup>
-            </Col>
+           
             <Col sm={4}>
               <FormGroup>
                 <Label>Total:</Label>
