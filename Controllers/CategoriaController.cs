@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ReactVentas.Models;
 using ReactVentas.Interfaces;
-using Microsoft.AspNetCore.SignalR;
-using ReactVentas.Hubs;
 
 namespace ReactVentas.Controllers
 {
@@ -12,12 +10,10 @@ namespace ReactVentas.Controllers
     public class CategoriaController : ControllerBase
     {
         private readonly ICategoriaRepository _categoriaRepository;
-        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public CategoriaController(ICategoriaRepository categoriaRepository, IHubContext<NotificationHub> hubContext)
+        public CategoriaController(ICategoriaRepository categoriaRepository)
         {
             _categoriaRepository = categoriaRepository;
-            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -47,9 +43,6 @@ namespace ReactVentas.Controllers
                 await _categoriaRepository.AddAsync(request);
                 await _categoriaRepository.SaveChangesAsync();
 
-                // Notify all clients about the new category
-                await _hubContext.Clients.Group("FerreteriaSistema").SendAsync("CategoriaCreated", request);
-
                 // Returns a 200 OK status on successful save.
                 return StatusCode(StatusCodes.Status200OK, "ok");
             }
@@ -69,9 +62,6 @@ namespace ReactVentas.Controllers
             {
                 await _categoriaRepository.UpdateAsync(request);
                 await _categoriaRepository.SaveChangesAsync();
-
-                // Notify all clients about the updated category
-                await _hubContext.Clients.Group("FerreteriaSistema").SendAsync("CategoriaUpdated", request);
 
                 // Returns a 200 OK status on successful update.
                 return StatusCode(StatusCodes.Status200OK, "ok");
@@ -94,9 +84,6 @@ namespace ReactVentas.Controllers
                 if (result)
                 {
                     await _categoriaRepository.SaveChangesAsync();
-                    
-                    // Notify all clients about the deleted category
-                    await _hubContext.Clients.Group("FerreteriaSistema").SendAsync("CategoriaDeleted", id);
                     
                     return StatusCode(StatusCodes.Status200OK, "ok");
                 }

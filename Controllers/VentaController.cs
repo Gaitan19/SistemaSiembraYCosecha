@@ -7,8 +7,6 @@ using ReactVentas.Models.DTO;
 using System.Data;
 using System.Globalization;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.SignalR;
-using ReactVentas.Hubs;
 
 namespace ReactVentas.Controllers
 {
@@ -17,12 +15,10 @@ namespace ReactVentas.Controllers
     public class VentaController : ControllerBase
     {
         private readonly DBREACT_VENTAContext _context;
-        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public VentaController(DBREACT_VENTAContext context, IHubContext<NotificationHub> hubContext)
+        public VentaController(DBREACT_VENTAContext context)
         {
             _context = context;
-            _hubContext = hubContext;
         }
 
         /// <summary>
@@ -106,14 +102,6 @@ namespace ReactVentas.Controllers
                     cmd.ExecuteNonQuery();
                     numeroDocumento = cmd.Parameters["nroDocumento"].Value.ToString();
                 }
-
-                // Notify all clients about the new sale
-                await _hubContext.Clients.Group("FerreteriaSistema").SendAsync("VentaCreated", new { 
-                    numeroDocumento = numeroDocumento,
-                    cliente = request.nombreCliente,
-                    total = request.total,
-                    fecha = DateTime.Now
-                });
 
                 return StatusCode(StatusCodes.Status200OK, new { numeroDocumento = numeroDocumento });
             }
