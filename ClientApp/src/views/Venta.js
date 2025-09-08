@@ -61,7 +61,6 @@ const Venta = () => {
     setTipoCambio(0);
   };
 
-
   const calcularVuelto = useCallback(
     (pagoCliente) => {
       // For Transferencia, no change is calculated (exact payment)
@@ -185,7 +184,6 @@ const Venta = () => {
           }
         }
       },
-      allowOutsideClick: false,
     });
   };
 
@@ -245,44 +243,27 @@ const Venta = () => {
         } else if (parseInt(inputValue) < 1) {
           Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
         } else {
-          // Verificar stock disponible
-          const tempStock = tempProducts.filter(
-            (item) => item.idProducto === producto.idProducto
+          // Actualizar la cantidad del producto en el carrito
+          const nuevaCantidad = parseInt(inputValue);
+          const nuevoTotal = producto.precio * nuevaCantidad;
+          
+          // Actualizar el producto en la lista de productos del carrito
+          const productosActualizados = productos.map(p => 
+            p.idProducto === producto.idProducto 
+              ? { ...p, cantidad: nuevaCantidad, total: nuevoTotal }
+              : p
           );
-
-          if (parseInt(inputValue) > tempStock[0]?.stock) {
-            Swal.showValidationMessage(
-              `La cantidad excede al stock disponible: ${tempStock[0]?.stock}`
-            );
-          } else {
-            // Actualizar la cantidad del producto en el carrito
-            const nuevaCantidad = parseInt(inputValue);
-            const nuevoTotal = producto.precio * nuevaCantidad;
-            
-            // Actualizar el producto en la lista de productos del carrito
-            const productosActualizados = productos.map(p => 
-              p.idProducto === producto.idProducto 
-                ? { ...p, cantidad: nuevaCantidad, total: nuevoTotal }
-                : p
-            );
             
             setProductos(productosActualizados);
             calcularTotal(productosActualizados);
           }
         }
       },
-      allowOutsideClick: function() { 
-        return !Swal.isLoading(); 
-      },
     });
   };
 
   const eliminarProducto = (id) => {
     let listaproductos = productos.filter((p) => p.idProducto !== id);
-    const tempProductsCart = productsCart.filter(
-      (item) => item[0].idProducto !== id
-    );
-    setProductsCart(() => tempProductsCart);
     setProductos(listaproductos);
     calcularTotal(listaproductos);
   };
@@ -301,7 +282,6 @@ const Venta = () => {
       t = st + imp; // Total con IVA
     }
 
-    setSubTotal(st.toFixed(2));
     setIgv(imp.toFixed(2));
     setTotal(t.toFixed(2));
   };
@@ -496,9 +476,7 @@ const Venta = () => {
     let venta = {
       documentoCliente: documentoCliente,
       nombreCliente: nombreCliente,
-      tipoDocumento: tipoDocumento,
       idUsuario: JSON.parse(user).idUsuario,
-      subTotal: parseFloat(subTotal),
       igv: parseFloat(igv),
       total: parseFloat(total),
       tipoPago: tipoPago,
@@ -508,8 +486,6 @@ const Venta = () => {
       vuelto: parseFloat(vuelto),
       listaProductos: productos,
     };
-
-    setProductsCart([]);
 
     fetch("api/venta/Registrar", {
       method: "POST",
@@ -555,7 +531,6 @@ const Venta = () => {
           }
         }
 
-        obtenerProductos();
       })
       .catch((error) => {
         Swal.fire("Opps!", "No se pudo crear la venta", "error");
@@ -779,29 +754,6 @@ const Venta = () => {
                   Detalle
                 </CardHeader>
                 <CardBody>
-                  <Row className="mb-2">
-                    <Col sm={12}>
-                      <InputGroup size="sm">
-                        <InputGroupText>Tipo:</InputGroupText>
-                        <Input
-                          type="select"
-                          value={tipoDocumento}
-                          onChange={(e) => setTipoDocumento(e.target.value)}
-                        >
-                          <option value="Boleta">Boleta</option>
-                          <option value="Factura">Factura</option>
-                        </Input>
-                      </InputGroup>
-                    </Col>
-                  </Row>
-                  <Row className="mb-2">
-                    <Col sm={12}>
-                      <InputGroup size="sm">
-                        <InputGroupText>Sub Total:C$</InputGroupText>
-                        <Input disabled value={subTotal} />
-                      </InputGroup>
-                    </Col>
-                  </Row>
                   <Row className="mb-2">
                     <Col sm={12}>
                       <InputGroup size="sm" className="Input-impuestos">
