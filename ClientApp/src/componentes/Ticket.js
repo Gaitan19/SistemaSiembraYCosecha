@@ -100,30 +100,33 @@
 
 // export default Ticket;
 
-
 import React from "react";
 import "../views/css/Ticket.css";
 
 const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
+
+  console.log("detalleVenta :>> ", detalleVenta);
   return (
     <div ref={ref} id="ticket-impresion" className="ticket">
       <div className="ticket__header">
-        <h4 className="ticket__title">FERRETERÍA LA UNIÓN</h4>
-        <p className="ticket__address">Maxi Pali Waspan Sur, 1 1/2c. Arriba</p>
+        <h4 className="ticket__title">SIEMBRAS & COSECHAS</h4>
         <hr className="ticket__separator" />
       </div>
       <div className="ticket__body">
         <p className="ticket__info">
-          <strong>Pago:</strong> Contado
+          <strong>Tipo Pago:</strong> {detalleVenta.tipoPago}
         </p>
         <p className="ticket__info">
-          <strong>Fecha Registro:</strong> {detalleVenta.fechaRegistro}
+          <strong>Moneda:</strong> {detalleVenta.tipoDinero}
+        </p>
+        <p className="ticket__info">
+          <strong>Fecha Registro:</strong> {detalleVenta.fechaRegistro} {detalleVenta.horaRegistro}
         </p>
         <p className="ticket__info">
           <strong>Celular:</strong> 8764-4751
         </p>
         <p className="ticket__info">
-          <strong>Numero Venta:</strong> {detalleVenta.numeroDocumento}
+          <strong>Ticket N.º:</strong> {detalleVenta.numeroDocumento}
         </p>
         <p className="ticket__info">
           <strong>Vendedor:</strong> {detalleVenta.usuarioRegistro}
@@ -173,24 +176,36 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
           </tbody>
         </table>
         <hr className="ticket__separator" />
-         <p className="ticket__info">
-          <strong>IVA:</strong> C${detalleVenta.impuesto}
-        </p>
-         <p className="ticket__info">
-          <strong>Sub-Total:</strong> C${detalleVenta.subTotal}
-        </p>
+
         <p className="ticket__info">
           <strong>Total:</strong> C${detalleVenta.total}
         </p>
-      </div>
-      <div className="ticket__footer">
-        <p className="ticket__footer-title">
-          <strong>Datos del Cliente:</strong>
+         <p className="ticket__info">
+          <strong>Monto Pago:</strong> {detalleVenta.tipoDinero === 'Cordobas' ? 'C$' : '$'}{detalleVenta.montoPago || "N/A"}
         </p>
-        <p className="ticket__info">
-          <strong>Nombre Cliente:</strong> {detalleVenta.nombreCliente}
+         <p className="ticket__info">
+          <strong>Cambio:</strong> {detalleVenta.vuelto > 0 && `C$${detalleVenta.vuelto}`}
         </p>
       </div>
+      {(detalleVenta.nombreCliente || detalleVenta.numeroRuc) && (
+        <div className="ticket__footer">
+          <p className="ticket__footer-title">
+            <strong>Datos del Cliente:</strong>
+          </p>
+
+          {detalleVenta.nombreCliente && (
+            <p className="ticket__info">
+              <strong>Nombre Cliente:</strong> {detalleVenta.nombreCliente}
+            </p>
+          )}
+
+          {detalleVenta.numeroRuc && (
+            <p className="ticket__info">
+              <strong>Ruc N.º:</strong> {detalleVenta.numeroRuc}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 });

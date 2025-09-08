@@ -10,11 +10,8 @@ import * as XLSX from "xlsx"
 const modeloInicio = [{
     fechaRegistro : "",
     numeroDocumento: "",
-    tipoDocumento: "",
     documentoCliente: "",
     nombreCliente: "",
-    subTotalVenta: "",
-    impuestoTotalVenta: "",
     totalVenta: "",
     producto: "",
     cantidad: "",
@@ -71,10 +68,7 @@ const ReporteVenta = () => {
             name: 'Numero Venta',
             selector: row => row.numeroDocumento,
         },
-        {
-            name: 'Tipo Documento',
-            selector: row => row.tipoDocumento,
-        },
+        
         {
             name: 'Documento Cliente',
             selector: row => row.documentoCliente,
@@ -83,14 +77,7 @@ const ReporteVenta = () => {
             name: 'Nombre Cliente',
             selector: row => row.nombreCliente,
         },
-        {
-            name: 'Sub Total Venta',
-            selector: row => row.subTotalVenta,
-        },
-        {
-            name: 'Impuesto Total Venta',
-            selector: row => row.impuestoTotalVenta,
-        },
+        
         {
             name: 'Total Venta',
             selector: row => row.totalVenta,

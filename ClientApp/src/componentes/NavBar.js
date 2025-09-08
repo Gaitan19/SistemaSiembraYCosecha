@@ -15,9 +15,9 @@ const NavBar = () => {
       >
         <div className="sidebar-brand-icon">
           {/* <i className="fas fa-desktop"></i> */}
-          <FaTools className="Icon-tools" />
+          <img src='/Batidos-logo.png' alt="Logo"  width={80} height={80}/>
         </div>
-        <div className="sidebar-brand-text mx-3">la Union</div>
+        <div className="sidebar-brand-text mx-3 d-none">SIEMBRAS & COSECHAS</div>
       </Link>
 
       <hr className="sidebar-divider my-0" />

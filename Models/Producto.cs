@@ -23,22 +23,10 @@ namespace ReactVentas.Models
         public int IdProducto { get; set; }
 
         /// <summary>
-        /// Gets or sets the product code.
-        /// Optional field.
-        /// </summary>
-        public string? Codigo { get; set; }
-
-        /// <summary>
         /// Gets or sets the name of the product.
         /// Optional field.
         /// </summary>
         public string? Nombre { get; set; }
-
-        /// <summary>
-        /// Gets or sets the brand of the product.
-        /// Optional field.
-        /// </summary>
-        public string? Marca { get; set; }
 
         /// <summary>
         /// Gets or sets the description of the product.
@@ -57,12 +45,6 @@ namespace ReactVentas.Models
         /// Optional field.  
         /// </summary>  
         public int? IdProveedor { get; set; }
-
-        /// <summary>
-        /// Gets or sets the stock quantity available for the product.
-        /// Optional field.
-        /// </summary>
-        public int? Stock { get; set; }
 
         /// <summary>
         /// Gets or sets the price of the product.
