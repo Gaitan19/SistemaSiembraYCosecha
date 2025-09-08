@@ -149,6 +149,7 @@ const Venta = () => {
             );
           });
 
+
           setA_Productos(filteredProducts);
           setMostrarProductos(true);
         })
@@ -203,7 +204,8 @@ const Venta = () => {
 
             let nuevoProducto = {
               idProducto: producto.idProducto,
-              descripcion: producto.nombre || producto.descripcion,
+              nombre: producto.nombre,
+              descripcion: producto.descripcion,
               cantidad: parseInt(inputValue),
               precio: producto.precio,
               total: producto.precio * parseFloat(inputValue),
@@ -230,7 +232,7 @@ const Venta = () => {
   const columnasProductos = [
     {
       name: "Nombre",
-      selector: (row) => row.nombre || row.descripcion,
+      selector: (row) => row.nombre,
       sortable: true,
       width: "200px",
     },
@@ -749,6 +751,7 @@ const Venta = () => {
                           <tr>
                             <th></th>
                             <th>Producto</th>
+                            <th>Descripción</th>
                             <th>Cantidad</th>
                             <th>Precio</th>
                             <th>Total</th>
@@ -774,6 +777,7 @@ const Venta = () => {
                                     <i className="fas fa-trash-alt"></i>
                                   </Button>
                                 </td>
+                                <td>{item.nombre}</td>
                                 <td>{item.descripcion}</td>
                                 <td>{item.cantidad}</td>
                                 <td>C${item.precio}</td>
