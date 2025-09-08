@@ -11,6 +11,7 @@
         public string numeroRuc { get; set; }
         public decimal montoPago { get; set; }
         public decimal vuelto { get; set; }
+        public decimal tipoCambio { get; set; }
 
         public List<DtoProducto> listaProductos { get; set; }
     }

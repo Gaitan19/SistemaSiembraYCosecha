@@ -89,6 +89,12 @@ namespace ReactVentas.Models
         public decimal? Vuelto { get; set; }
 
         /// <summary>
+        /// Gets or sets the exchange rate used for the sale when payment is in foreign currency.
+        /// Optional field.
+        /// </summary>
+        public decimal? TipoCambio { get; set; }
+
+        /// <summary>
         /// Navigation property to the user associated with this sale.
         /// </summary>
         public virtual Usuario? IdUsuarioNavigation { get; set; }

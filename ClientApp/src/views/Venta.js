@@ -509,6 +509,7 @@ const Venta = () => {
       numeroRuc: numeroRuc || "",
       montoPago: parseFloat(montoPago),
       vuelto: parseFloat(vuelto),
+      tipoCambio: parseFloat(tipoCambio) || 0,
       listaProductos: productos,
     };
 

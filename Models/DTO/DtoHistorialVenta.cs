@@ -19,6 +19,8 @@
 
          public decimal? MontoPago { get; set; }
 
+         public decimal? TipoCambio { get; set; }
+
         public List<DtoDetalleVenta> Detalle { get; set; }
 
 
