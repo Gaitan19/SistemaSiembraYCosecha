@@ -146,6 +146,7 @@ namespace ReactVentas.Controllers
                             NumeroDocumento = v.NumeroDocumento,
                             TipoDocumento = v.TipoDocumento,
                             DocumentoCliente = v.DocumentoCliente,
+                            NumeroRuc = v.NumeroRuc,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
                             SubTotal = v.SubTotal.ToString(),
@@ -153,7 +154,8 @@ namespace ReactVentas.Controllers
                             Total = v.Total.ToString(),
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
-                                Producto = d.IdProductoNavigation.Descripcion,
+                                Producto = d.IdProductoNavigation.Nombre,
+                                Descripcion = d.IdProductoNavigation.Descripcion,
                                 Cantidad = d.Cantidad.ToString(),
                                 Precio = d.Precio.ToString(),
                                 Total = d.Total.ToString()
@@ -182,7 +184,8 @@ namespace ReactVentas.Controllers
                             Total = v.Total.ToString(),
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
-                                Producto = d.IdProductoNavigation.Descripcion,
+                                Producto = d.IdProductoNavigation.Nombre,
+                                Descripcion = d.IdProductoNavigation.Descripcion,
                                 Cantidad = d.Cantidad.ToString(),
                                 Precio = d.Precio.ToString(),
                                 Total = d.Total.ToString()
