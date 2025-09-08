@@ -1,0 +1,768 @@
+import { useEffect, useState } from "react";
+import DataTable from "react-data-table-component";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  Label,
+  Input,
+  FormGroup,
+  ModalFooter,
+  Row,
+  Col,
+} from "reactstrap";
+import Swal from "sweetalert2";
+import {
+  exportToPDF,
+  exportToExcel,
+  applySearchFilter,
+} from "../utils/exportHelpers";
+import { useSignalR } from "../context/SignalRProvider"; // Importa el hook de SignalR
+
+const modeloProducto = {
+  idProducto: 0,
+  codigo: "",
+  nombre: "",
+  marca: "",
+  descripcion: "",
+  idCategoria: 0,
+  idProveedor: 0,
+  stock: 1,
+  precio: 0,
+  esActivo: true,
+};
+
+const Producto = () => {
+  const [producto, setProducto] = useState(modeloProducto);
+  const [pendiente, setPendiente] = useState(true);
+  const [productos, setProductos] = useState([]);
+  const [filteredProductos, setFilteredProductos] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [categorias, setCategorias] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [verModal, setVerModal] = useState(false);
+  const [modoSoloLectura, setModoSoloLectura] = useState(false);
+  const { subscribe } = useSignalR(); // Obtiene la función subscribe del contexto
+
+  const handleChange = (e) => {
+    let value;
+
+    if (e.target.name === "idCategoria" || e.target.name === "idProveedor") {
+      value = e.target.value;
+    } else if (e.target.name === "esActivo") {
+      value = e.target.value === "true" ? true : false;
+    } else {
+      value = e.target.value;
+    }
+
+    setProducto({
+      ...producto,
+      [e.target.name]: value,
+    });
+  };
+
+  // Combined filtering function that applies both search and status filters
+  const applyFilters = (data, searchValue, statusValue) => {
+    let filtered = data;
+
+    // Apply status filter
+    if (statusValue === "activos") {
+      filtered = filtered.filter((item) => item.esActivo === true);
+    } else if (statusValue === "inactivos") {
+      filtered = filtered.filter((item) => item.esActivo === false);
+    }
+    // "todos" shows all items, no additional filtering needed
+
+    // Apply search filter
+    if (searchValue && searchValue !== "") {
+      const searchFields = [
+        { accessor: (item) => item.codigo },
+        { accessor: (item) => item.marca },
+        { accessor: (item) => item.descripcion },
+        { accessor: (item) => item.idCategoriaNavigation?.descripcion || "" },
+        { accessor: (item) => item.idProveedorNavigation?.nombre || "" },
+        { accessor: (item) => (item.esActivo ? "activo" : "no activo") },
+      ];
+
+      filtered = applySearchFilter(filtered, searchValue, searchFields);
+    }
+
+    return filtered;
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    const filtered = applyFilters(productos, value, statusFilter);
+    setFilteredProductos(filtered);
+  };
+
+  const handleStatusFilter = (e) => {
+    const value = e.target.value;
+    setStatusFilter(value);
+
+    const filtered = applyFilters(productos, searchTerm, value);
+    setFilteredProductos(filtered);
+  };
+
+  const exportToPDFHandler = () => {
+    const columns = [
+      { header: "Código", accessor: (row) => row.codigo },
+      { header: "Marca", accessor: (row) => row.marca },
+      { header: "Descripción", accessor: (row) => row.descripcion },
+      {
+        header: "Categoría",
+        accessor: (row) => row.idCategoriaNavigation?.descripcion || "",
+      },
+      {
+        header: "Proveedor",
+        accessor: (row) => row.idProveedorNavigation?.nombre || "",
+      },
+      { header: "Stock", accessor: (row) => row.stock.toString() },
+      { header: "Precio", accessor: (row) => `C$${row.precio}` },
+      {
+        header: "Estado",
+        accessor: (row) => (row.esActivo ? "Activo" : "No Activo"),
+      },
+    ];
+
+    exportToPDF(filteredProductos, columns, "Lista_de_Productos");
+  };
+
+  const exportToExcelHandler = () => {
+    const excelData = filteredProductos.map((prod) => ({
+      ID: prod.idProducto,
+      Código: prod.codigo,
+      Marca: prod.marca,
+      Descripción: prod.descripcion,
+      Categoría: prod.idCategoriaNavigation?.descripcion || "",
+      Proveedor: prod.idProveedorNavigation?.nombre || "",
+      Stock: prod.stock,
+      Precio: `C$${prod.precio}`,
+      Estado: prod.esActivo ? "Activo" : "No Activo",
+    }));
+
+    exportToExcel(excelData, "Productos");
+  };
+
+  const obtenerCategorias = async () => {
+    try {
+      let response = await fetch("api/categoria/Lista");
+      if (response.ok) {
+        let data = await response.json();
+        setCategorias(() => data.filter((item) => item.esActivo));
+      }
+    } catch (error) {
+      console.error("Error obteniendo categorías:", error);
+    }
+  };
+
+  const obtenerProveedores = async () => {
+    try {
+      let response = await fetch("api/proveedor/Lista");
+      if (response.ok) {
+        let data = await response.json();
+        setProveedores(() => data.filter((item) => item.esActivo));
+      }
+    } catch (error) {
+      console.error("Error obteniendo proveedores:", error);
+    }
+  };
+
+  const obtenerProductos = async () => {
+    try {
+      let response = await fetch("api/producto/Lista");
+      if (response.ok) {
+        let data = await response.json();
+        setProductos(() => data);
+        setFilteredProductos(() => data);
+        setPendiente(false);
+      }
+    } catch (error) {
+      console.error("Error obteniendo productos:", error);
+      setPendiente(false);
+    }
+  };
+
+  useEffect(() => {
+    obtenerCategorias();
+    obtenerProveedores();
+    obtenerProductos();
+
+    // Configurar suscripciones a eventos de SignalR
+    const unsubscribeCreated = subscribe("ProductoCreated", (nuevoProducto) => {
+      // Agrega el nuevo producto al inicio de la lista
+      setProductos((prev) => {
+        const newData = [nuevoProducto, ...prev];
+        // Apply current filters to new data
+        const filtered = applyFilters(newData, searchTerm, statusFilter);
+        setFilteredProductos(filtered);
+        return newData;
+      });
+
+      // Muestra notificación toast
+      Swal.fire({
+        position: "top-end",
+        icon: "info",
+        title: "Nuevo producto agregado",
+        text: `Se agregó: ${nuevoProducto.descripcion}`,
+        showConfirmButton: false,
+        timer: 3000,
+        toast: true,
+      });
+    });
+
+    const unsubscribeUpdated = subscribe(
+      "ProductoUpdated",
+      (productoActualizado) => {
+        // Actualiza el producto en la lista
+        setProductos((prev) => {
+          const newData = prev.map((prod) =>
+            prod.idProducto === productoActualizado.idProducto
+              ? productoActualizado
+              : prod
+          );
+          // Apply current filters to new data
+          const filtered = applyFilters(newData, searchTerm, statusFilter);
+          setFilteredProductos(filtered);
+          return newData;
+        });
+
+        // Muestra notificación toast
+        Swal.fire({
+          position: "top-end",
+          icon: "info",
+          title: "Producto actualizado",
+          text: `Se actualizó: ${productoActualizado.descripcion}`,
+          showConfirmButton: false,
+          timer: 3000,
+          toast: true,
+        });
+      }
+    );
+
+    const unsubscribeDeleted = subscribe("ProductoDeleted", (id) => {
+      // Marca el producto como inactivo
+      setProductos((prev) => {
+        const newData = prev.map((prod) =>
+          prod.idProducto === id ? { ...prod, esActivo: false } : prod
+        );
+        // Apply current filters to new data
+        const filtered = applyFilters(newData, searchTerm, statusFilter);
+        setFilteredProductos(filtered);
+        return newData;
+      });
+
+      // Muestra notificación toast
+      Swal.fire({
+        position: "top-end",
+        icon: "info",
+        title: "Producto eliminado",
+        text: "Un producto fue eliminado",
+        showConfirmButton: false,
+        timer: 3000,
+        toast: true,
+      });
+    });
+
+    // Limpieza de suscripciones al desmontar el componente
+    return () => {
+      unsubscribeCreated();
+      unsubscribeUpdated();
+      unsubscribeDeleted();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subscribe]); // Removed searchTerm dependency
+
+  // Separate useEffect to handle search term and status filter changes
+  useEffect(() => {
+    const filtered = applyFilters(productos, searchTerm, statusFilter);
+    setFilteredProductos(filtered);
+  }, [searchTerm, statusFilter, productos]);
+
+  const columns = [
+    {
+      name: "Codigo",
+      selector: (row) => row.codigo,
+      sortable: true,
+    },
+    {
+      name: "Nombre",
+      selector: (row) => row.nombre,
+      sortable: true,
+    },
+    {
+      name: "Marca",
+      selector: (row) => row.marca,
+      sortable: true,
+    },
+    {
+      name: "Descripcion",
+      selector: (row) => row.descripcion,
+      sortable: true,
+    },
+    {
+      name: "Categoria",
+      selector: (row) => row.idCategoriaNavigation,
+      sortable: true,
+      cell: (row) => row.idCategoriaNavigation.descripcion,
+    },
+    {
+      name: "Proveedor",
+      selector: (row) => row.idProveedorNavigation,
+      sortable: true,
+      cell: (row) => row.idProveedorNavigation?.nombre || "Sin proveedor",
+    },
+    {
+      name: "Estado",
+      selector: (row) => row.esActivo,
+      sortable: true,
+      cell: (row) => {
+        let clase;
+        clase = row.esActivo
+          ? "badge badge-info p-2"
+          : "badge badge-danger p-2";
+        return (
+          <span className={clase}>{row.esActivo ? "Activo" : "No Activo"}</span>
+        );
+      },
+    },
+    {
+      name: "",
+      cell: (row) => (
+        <>
+          <Button
+            color="info"
+            size="sm"
+            className="mr-2"
+            onClick={() => abrirVerModal(row)}
+          >
+            <i className="fas fa-eye"></i>
+          </Button>
+
+          <Button
+            color="primary"
+            size="sm"
+            className="mr-2"
+            onClick={() => abrirEditarModal(row)}
+          >
+            <i className="fas fa-pen-alt"></i>
+          </Button>
+
+          <Button
+            color="danger"
+            size="sm"
+            onClick={() => eliminarProducto(row.idProducto)}
+          >
+            <i className="fas fa-trash-alt"></i>
+          </Button>
+        </>
+      ),
+    },
+  ];
+
+  const customStyles = {
+    headCells: {
+      style: {
+        fontSize: "13px",
+        fontWeight: 800,
+      },
+    },
+    headRow: {
+      style: {
+        backgroundColor: "#eee",
+      },
+    },
+  };
+
+  const paginationComponentOptions = {
+    rowsPerPageText: "Filas por página",
+    rangeSeparatorText: "de",
+    selectAllRowsItem: true,
+    selectAllRowsItemText: "Todos",
+  };
+
+  const abrirEditarModal = (data) => {
+    setProducto(data);
+    setModoSoloLectura(false);
+    setVerModal(!verModal);
+  };
+
+  const abrirVerModal = (data) => {
+    setProducto(data);
+    setModoSoloLectura(true);
+    setVerModal(!verModal);
+  };
+
+  const cerrarModal = () => {
+    setProducto(modeloProducto);
+    setModoSoloLectura(false);
+    setVerModal(!verModal);
+  };
+
+  const guardarCambios = async () => {
+    try {
+      // Eliminar propiedades de navegación para evitar problemas en la serialización
+      const productoParaEnviar = { ...producto };
+      delete productoParaEnviar.idCategoriaNavigation;
+      delete productoParaEnviar.idProveedorNavigation;
+
+      let response;
+      if (productoParaEnviar.idProducto === 0) {
+        response = await fetch("api/producto/Guardar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8",
+          },
+          body: JSON.stringify(productoParaEnviar),
+        });
+      } else {
+        response = await fetch("api/producto/Editar", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8",
+          },
+          body: JSON.stringify(productoParaEnviar),
+        });
+      }
+
+      if (response.ok) {
+        // No necesitamos obtenerProductos porque SignalR actualizará en tiempo real
+        setProducto(modeloProducto);
+        setVerModal(!verModal);
+
+        Swal.fire(
+          `${productoParaEnviar.idProducto === 0 ? "Guardado" : "Actualizado"}`,
+          `El producto fue ${
+            productoParaEnviar.idProducto === 0 ? "Agregado" : "Actualizado"
+          }`,
+          "success"
+        );
+      } else {
+        const errorText = await response.text();
+        Swal.fire("Opp!", `No se pudo guardar: ${errorText}`, "warning");
+      }
+    } catch (error) {
+      console.error("Error al guardar el producto:", error);
+      Swal.fire("Error", "Ocurrió un error inesperado", "error");
+    }
+  };
+
+  const eliminarProducto = async (id) => {
+    Swal.fire({
+      title: "¿Está seguro?",
+      text: "Desea eliminar el producto",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, continuar",
+      cancelButtonText: "No, volver",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("api/producto/Eliminar/" + id, {
+          method: "DELETE",
+        })
+          .then((response) => {
+            if (response.ok) {
+              // No es necesario obtenerProductos porque SignalR actualizará
+              Swal.fire("Eliminado!", "El producto fue eliminado.", "success");
+            } else {
+              response.text().then((errorText) => {
+                Swal.fire("Error", `Error al eliminar: ${errorText}`, "error");
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error eliminando producto:", error);
+            Swal.fire("Error", "Ocurrió un error inesperado", "error");
+          });
+      }
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    guardarCambios();
+  };
+
+  return (
+    <>
+      <Row>
+        <Col sm="12">
+          <Card>
+            <CardHeader style={{ backgroundColor: "#4e73df", color: "white" }}>
+              <Row>
+                <Col sm="6">
+                  <h5>Lista de Productos</h5>
+                </Col>
+                <Col sm="6" className="text-right">
+                  <Button
+                    color="success"
+                    size="sm"
+                    onClick={() => setVerModal(!verModal)}
+                  >
+                    <i className="fas fa-plus-circle mr-2"></i>
+                    Nuevo Producto
+                  </Button>
+                </Col>
+              </Row>
+            </CardHeader>
+            <CardBody>
+              <Row className="mb-3">
+                <Col sm="2">
+                  <Input
+                    type="select"
+                    value={statusFilter}
+                    onChange={handleStatusFilter}
+                    bsSize="sm"
+                    style={{
+                      border: "2px solid #4e73df",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    <option value="todos">Todos</option>
+                    <option value="activos">Activos</option>
+                    <option value="inactivos">Inactivos</option>
+                  </Input>
+                </Col>
+                <Col sm="3">
+                  <Input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    bsSize="sm"
+                    style={{
+                      border: "2px solid #4e73df",
+                      borderRadius: "5px",
+                    }}
+                  />
+                </Col>
+                <Col sm="7" className="text-right">
+                  <Button
+                    color="danger"
+                    size="sm"
+                    className="mr-2"
+                    onClick={exportToPDFHandler}
+                  >
+                    <i className="fas fa-file-pdf mr-1"></i>
+                    PDF
+                  </Button>
+                  <Button
+                    color="success"
+                    size="sm"
+                    onClick={exportToExcelHandler}
+                  >
+                    <i className="fas fa-file-excel mr-1"></i>
+                    Excel
+                  </Button>
+                </Col>
+              </Row>
+
+              <DataTable
+                columns={columns}
+                data={filteredProductos}
+                customStyles={customStyles}
+                pagination
+                paginationComponentOptions={paginationComponentOptions}
+                fixedHeader
+                fixedHeaderScrollHeight="600px"
+                progressPending={pendiente}
+                noDataComponent={
+                  <div className="text-center p-4">
+                    <i className="fas fa-search fa-3x text-muted mb-3"></i>
+                    <p className="text-muted">
+                      No se encontraron registros coincidentes
+                    </p>
+                  </div>
+                }
+              />
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+
+      <Modal isOpen={verModal} toggle={cerrarModal} size="lg">
+        <form onSubmit={handleSubmit}>
+          <ModalHeader toggle={cerrarModal}>
+            {producto.idProducto === 0
+              ? "Nuevo Producto"
+              : modoSoloLectura
+              ? "Ver Producto"
+              : "Editar Producto"}
+          </ModalHeader>
+          <ModalBody>
+            <Row>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Código</Label>
+                  <Input
+                    bsSize="sm"
+                    name="codigo"
+                    onChange={handleChange}
+                    value={producto.codigo}
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Nombre</Label>
+                  <Input
+                    bsSize="sm"
+                    name="nombre"
+                    onChange={handleChange}
+                    value={producto.nombre}
+                    required
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Marca</Label>
+                  <Input
+                    bsSize="sm"
+                    name="marca"
+                    onChange={handleChange}
+                    value={producto.marca}
+                    required
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Descripción</Label>
+                  <Input
+                    bsSize="sm"
+                    name="descripcion"
+                    onChange={handleChange}
+                    value={producto.descripcion}
+                    required
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Categoría</Label>
+                  <Input
+                    bsSize="sm"
+                    type="select"
+                    name="idCategoria"
+                    onChange={handleChange}
+                    value={producto.idCategoria}
+                    required
+                    disabled={modoSoloLectura}
+                  >
+                    <option value={0}>Seleccionar</option>
+                    {categorias.map((item) => (
+                      <option key={item.idCategoria} value={item.idCategoria}>
+                        {item.descripcion}
+                      </option>
+                    ))}
+                  </Input>
+                </FormGroup>
+              </Col>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Proveedor</Label>
+                  <Input
+                    bsSize="sm"
+                    type="select"
+                    name="idProveedor"
+                    onChange={handleChange}
+                    value={producto.idProveedor}
+                    disabled={modoSoloLectura}
+                  >
+                    <option value={0}>Seleccionar</option>
+                    {proveedores.map((item) => (
+                      <option key={item.idProveedor} value={item.idProveedor}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Input>
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Stock</Label>
+                  <Input
+                    bsSize="sm"
+                    name="stock"
+                    type="number"
+                    min={1}
+                    onChange={handleChange}
+                    value={producto.stock}
+                    required
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Precio</Label>
+                  <Input
+                    bsSize="sm"
+                    name="precio"
+                    type="number"
+                    min={0.01}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={producto.precio}
+                    required
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Estado</Label>
+                  <Input
+                    bsSize="sm"
+                    type="select"
+                    name="esActivo"
+                    onChange={handleChange}
+                    value={producto.esActivo}
+                    disabled={modoSoloLectura}
+                  >
+                    <option value={true}>Activo</option>
+                    <option value={false}>Inactivo</option>
+                  </Input>
+                </FormGroup>
+              </Col>
+            </Row>
+          </ModalBody>
+          <ModalFooter>
+            {!modoSoloLectura && (
+              <Button type="submit" size="sm" color="primary">
+                Guardar
+              </Button>
+            )}
+            <Button size="sm" color="danger" onClick={cerrarModal}>
+              Cerrar
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
+    </>
+  );
+};
+
+export default Producto;
