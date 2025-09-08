@@ -34,12 +34,13 @@ namespace ReactVentas.Controllers
             try
             {
                 lista = await _context.Productos
-                .Where(p => p.EsActivo == true && string.Concat(p.Codigo.ToLower(), p.Marca.ToLower(), p.Descripcion.ToLower()).Contains(busqueda.ToLower()))
+                .Where(p => p.EsActivo == true && string.Concat(p.Codigo.ToLower(), p.Marca.ToLower(), p.Descripcion.ToLower(),p.Nombre.ToLower()).Contains(busqueda.ToLower()))
                 .Select(p => new DtoProducto()
                 {
                     IdProducto = p.IdProducto,
                     Codigo = p.Codigo,
                     Marca = p.Marca,
+                    Nombre = p.Nombre,
                     Descripcion = p.Descripcion,
                     Precio = p.Precio
                 }).ToListAsync();
@@ -145,6 +146,7 @@ namespace ReactVentas.Controllers
                             NumeroDocumento = v.NumeroDocumento,
                             TipoDocumento = v.TipoDocumento,
                             DocumentoCliente = v.DocumentoCliente,
+                            NumeroRuc = v.NumeroRuc,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
                             SubTotal = v.SubTotal.ToString(),
@@ -152,7 +154,8 @@ namespace ReactVentas.Controllers
                             Total = v.Total.ToString(),
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
-                                Producto = d.IdProductoNavigation.Descripcion,
+                                Producto = d.IdProductoNavigation.Nombre,
+                                Descripcion = d.IdProductoNavigation.Descripcion,
                                 Cantidad = d.Cantidad.ToString(),
                                 Precio = d.Precio.ToString(),
                                 Total = d.Total.ToString()
@@ -181,7 +184,8 @@ namespace ReactVentas.Controllers
                             Total = v.Total.ToString(),
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
-                                Producto = d.IdProductoNavigation.Descripcion,
+                                Producto = d.IdProductoNavigation.Nombre,
+                                Descripcion = d.IdProductoNavigation.Descripcion,
                                 Cantidad = d.Cantidad.ToString(),
                                 Precio = d.Precio.ToString(),
                                 Total = d.Total.ToString()
