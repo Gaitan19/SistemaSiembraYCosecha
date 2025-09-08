@@ -77,7 +77,8 @@ tipoPago varchar(50),
 tipoDinero varchar(50),
 numeroRuc varchar(50),
 montoPago decimal(10,2),
-vuelto decimal(10,2)
+vuelto decimal(10,2),
+tipoCambio DECIMAL(10,2)
 )
 
 go
