@@ -111,11 +111,6 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdProducto).HasColumnName("idProducto");
 
-                entity.Property(e => e.Codigo)
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("codigo");
-
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(100)
                     .IsUnicode(false)
@@ -137,16 +132,9 @@ namespace ReactVentas.Models
                 entity.Property(e => e.IdProveedor).HasColumnName("idProveedor");  
 
 
-                entity.Property(e => e.Marca)
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("marca");
-
                 entity.Property(e => e.Precio)
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("precio");
-
-                entity.Property(e => e.Stock).HasColumnName("stock");
 
                 entity.HasOne(d => d.IdCategoriaNavigation)
                     .WithMany(p => p.Productos)
@@ -351,10 +339,6 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
 
-                entity.Property(e => e.ImpuestoTotal)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("impuestoTotal");
-
                 entity.Property(e => e.NombreCliente)
                     .HasMaxLength(40)
                     .IsUnicode(false)
@@ -364,15 +348,6 @@ namespace ReactVentas.Models
                     .HasMaxLength(40)
                     .IsUnicode(false)
                     .HasColumnName("numeroDocumento");
-
-                entity.Property(e => e.SubTotal)
-                    .HasColumnType("decimal(10, 2)")
-                    .HasColumnName("subTotal");
-
-                entity.Property(e => e.TipoDocumento)
-                    .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .HasColumnName("tipoDocumento");
 
                 entity.Property(e => e.Total)
                     .HasColumnType("decimal(10, 2)")
