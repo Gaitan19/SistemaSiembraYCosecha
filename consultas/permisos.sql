@@ -1,7 +1,7 @@
 -- Script para crear el sistema de permisos de usuarios
 -- Tabla para gestionar permisos específicos por usuario
 
-use DBREACT_VENTA
+use DBSiembra_VENTA
 go
 
 -- Crear tabla de módulos del sistema

@@ -1,9 +1,9 @@
 
 
-create database DBREACT_VENTA
+create database DBSiembra_VENTA
 
 go
-use DBREACT_VENTA
+use DBSiembra_VENTA
 
 go
 
