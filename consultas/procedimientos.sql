@@ -5,10 +5,7 @@ GO
 create procedure sp_RegistrarVenta(
 @documentoCliente varchar(40),
 @nombreCliente varchar(40),
-@tipoDocumento varchar(50),
 @idUsuario int,
-@subTotal decimal(10,2),
-@impuestoTotal decimal(10,2),
 @total decimal(10,2),
 @productos xml,
 @tipoPago varchar(50),
@@ -47,17 +44,14 @@ begin
 			
 			set @nrodocgenerado =  RIGHT('000000' + convert(varchar(max),@nro),6)
 
-			insert into Venta(numeroDocumento,tipoDocumento,idUsuario,documentoCliente,nombreCliente,subTotal,impuestoTotal,total,tipoPago,tipoDinero,numeroRuc,montoPago,vuelto) 
-			values (@nrodocgenerado,@tipoDocumento,@idUsuario,@documentoCliente,@nombreCliente,@subTotal,@impuestoTotal,@total,@tipoPago,@tipoDinero,@numeroRuc,@montoPago,@vuelto)
+			insert into Venta(numeroDocumento,idUsuario,documentoCliente,nombreCliente,total,tipoPago,tipoDinero,numeroRuc,montoPago,vuelto) 
+			values (@nrodocgenerado,@idUsuario,@documentoCliente,@nombreCliente,@total,@tipoPago,@tipoDinero,@numeroRuc,@montoPago,@vuelto)
 
 
 			set @idventa = SCOPE_IDENTITY()
 
 			insert into DetalleVenta(idVenta,idProducto,cantidad,precio,total) 
 			select @idventa,IdProducto,Cantidad,Precio,Total from @tbproductos
-
-			update p set p.Stock = p.Stock - dv.Cantidad from PRODUCTO p
-			inner join @tbproductos dv on dv.IdProducto = p.IdProducto
 
 			-- Registrar ingreso con el monto que paga el cliente
 			insert into Ingreso(descripcion,monto,tipoPago,tipoDinero,idUsuario,esActivo)

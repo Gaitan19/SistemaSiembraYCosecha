@@ -24,13 +24,10 @@ import {
 
 const modeloProducto = {
   idProducto: 0,
-  codigo: "",
   nombre: "",
-  marca: "",
   descripcion: "",
   idCategoria: 0,
   idProveedor: 0,
-  stock: 1,
   precio: 0,
   esActivo: true,
 };
@@ -79,8 +76,6 @@ const Producto = () => {
     // Apply search filter
     if (searchValue && searchValue !== "") {
       const searchFields = [
-        { accessor: (item) => item.codigo },
-        { accessor: (item) => item.marca },
         { accessor: (item) => item.descripcion },
         { accessor: (item) => item.idCategoriaNavigation?.descripcion || "" },
         { accessor: (item) => item.idProveedorNavigation?.nombre || "" },
@@ -111,8 +106,6 @@ const Producto = () => {
 
   const exportToPDFHandler = () => {
     const columns = [
-      { header: "Código", accessor: (row) => row.codigo },
-      { header: "Marca", accessor: (row) => row.marca },
       { header: "Descripción", accessor: (row) => row.descripcion },
       {
         header: "Categoría",
@@ -122,7 +115,6 @@ const Producto = () => {
         header: "Proveedor",
         accessor: (row) => row.idProveedorNavigation?.nombre || "",
       },
-      { header: "Stock", accessor: (row) => row.stock.toString() },
       { header: "Precio", accessor: (row) => `C$${row.precio}` },
       {
         header: "Estado",
@@ -136,12 +128,9 @@ const Producto = () => {
   const exportToExcelHandler = () => {
     const excelData = filteredProductos.map((prod) => ({
       ID: prod.idProducto,
-      Código: prod.codigo,
-      Marca: prod.marca,
       Descripción: prod.descripcion,
       Categoría: prod.idCategoriaNavigation?.descripcion || "",
       Proveedor: prod.idProveedorNavigation?.nombre || "",
-      Stock: prod.stock,
       Precio: `C$${prod.precio}`,
       Estado: prod.esActivo ? "Activo" : "No Activo",
     }));
@@ -203,18 +192,8 @@ const Producto = () => {
 
   const columns = [
     {
-      name: "Codigo",
-      selector: (row) => row.codigo,
-      sortable: true,
-    },
-    {
       name: "Nombre",
       selector: (row) => row.nombre,
-      sortable: true,
-    },
-    {
-      name: "Marca",
-      selector: (row) => row.marca,
       sortable: true,
     },
     {
@@ -515,19 +494,7 @@ const Producto = () => {
           </ModalHeader>
           <ModalBody>
             <Row>
-              <Col sm={6}>
-                <FormGroup>
-                  <Label>Código</Label>
-                  <Input
-                    bsSize="sm"
-                    name="codigo"
-                    onChange={handleChange}
-                    value={producto.codigo}
-                    readOnly={modoSoloLectura}
-                  />
-                </FormGroup>
-              </Col>
-              <Col sm={6}>
+              <Col sm={12}>
                 <FormGroup>
                   <Label>Nombre</Label>
                   <Input
@@ -542,20 +509,7 @@ const Producto = () => {
               </Col>
             </Row>
             <Row>
-              <Col sm={6}>
-                <FormGroup>
-                  <Label>Marca</Label>
-                  <Input
-                    bsSize="sm"
-                    name="marca"
-                    onChange={handleChange}
-                    value={producto.marca}
-                    required
-                    readOnly={modoSoloLectura}
-                  />
-                </FormGroup>
-              </Col>
-              <Col sm={6}>
+              <Col sm={12}>
                 <FormGroup>
                   <Label>Descripción</Label>
                   <Input
@@ -615,21 +569,6 @@ const Producto = () => {
             <Row>
               <Col sm={6}>
                 <FormGroup>
-                  <Label>Stock</Label>
-                  <Input
-                    bsSize="sm"
-                    name="stock"
-                    type="number"
-                    min={1}
-                    onChange={handleChange}
-                    value={producto.stock}
-                    required
-                    readOnly={modoSoloLectura}
-                  />
-                </FormGroup>
-              </Col>
-              <Col sm={6}>
-                <FormGroup>
                   <Label>Precio</Label>
                   <Input
                     bsSize="sm"
@@ -644,8 +583,6 @@ const Producto = () => {
                   />
                 </FormGroup>
               </Col>
-            </Row>
-            <Row>
               <Col sm={6}>
                 <FormGroup>
                   <Label>Estado</Label>

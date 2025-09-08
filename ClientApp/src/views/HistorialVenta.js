@@ -260,7 +260,6 @@ const HistorialVenta = () => {
                       <tr>
                         <th>Fecha Registro</th>
                         <th>Numero Venta</th>
-                        <th>Tipo Documento</th>
                         <th>Documento Cliente</th>
                         <th>Nombre Cliente</th>
                         <th>Total</th>
@@ -279,7 +278,6 @@ const HistorialVenta = () => {
                           <tr key={item.numeroDocumento}>
                             <td>{item.fechaRegistro}</td>
                             <td>{item.numeroDocumento}</td>
-                            <td>{item.tipoDocumento}</td>
                             <td>{item.documentoCliente}</td>
                             <td>{item.nombreCliente}</td>
                             <td>C${item.total}</td>
@@ -406,17 +404,7 @@ const HistorialVenta = () => {
             </tbody>
           </Table>
           <Row>
-            <Col sm={4}>
-              <FormGroup>
-                <Label>Sub Total:</Label>
-                <Input
-                  bsSize="sm"
-                  disabled
-                  value={`C$${detalleVenta.subTotal}`}
-                />
-              </FormGroup>
-            </Col>
-            <Col sm={4}>
+            <Col sm={6}>
               <FormGroup>
                 <Label>Total:</Label>
                 <Input bsSize="sm" disabled value={`C$${detalleVenta.total}`} />

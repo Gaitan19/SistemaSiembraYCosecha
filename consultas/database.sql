@@ -48,13 +48,10 @@ create table Proveedor (
 go 
 create table Producto (
 idProducto int primary key identity(1,1),
-codigo varchar(100) unique,
 nombre varchar(100),
-marca varchar(100),
 descripcion varchar(200),
 idCategoria int references Categoria(idCategoria),
 idProveedor int references Proveedor(idProveedor),
-stock int,
 precio decimal(10,2),
 esActivo bit,
 fechaRegistro datetime default getdate()
@@ -65,13 +62,10 @@ go
 create table Venta(
 idVenta int primary key identity(1,1),
 numeroDocumento varchar(40),
-tipoDocumento varchar(50),
 fechaRegistro datetime default getdate(),
 idUsuario int references Usuario(idUsuario),
 documentoCliente varchar(40),
 nombreCliente varchar(100),
-subTotal decimal(10,2),
-impuestoTotal decimal(10,2),
 total decimal(10,2),
 tipoPago varchar(50),
 tipoDinero varchar(50),

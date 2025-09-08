@@ -31,13 +31,9 @@ const Venta = () => {
   const [documentoCliente, setDocumentoCliente] = useState(generateCode());
   const [nombreCliente, setNombreCliente] = useState("");
 
-  const [tipoDocumento, setTipoDocumento] = useState("Boleta");
   const [productos, setProductos] = useState([]);
-  const [productsCart, setProductsCart] = useState([]);
   const [total, setTotal] = useState(0);
-  const [subTotal, setSubTotal] = useState(0);
   const [igv, setIgv] = useState(0);
-  const [tempProducts, setTempProducts] = useState([]);
   const [alreadyProductos, setAlreadyProductos] = useState(false);
 
   // New fields for payment
@@ -54,10 +50,8 @@ const Venta = () => {
   const reestablecer = () => {
     setDocumentoCliente(generateCode());
     setNombreCliente("");
-    setTipoDocumento("Boleta");
     setProductos([]);
     setTotal(0);
-    setSubTotal(0);
     setIgv(0);
     setTipoPago("Efectivo");
     setTipoDinero("Cordobas");
@@ -65,15 +59,6 @@ const Venta = () => {
     setMontoPago(0);
     setVuelto(0);
     setTipoCambio(0);
-  };
-
-  const obtenerProductos = async () => {
-    let response = await fetch("api/producto/Lista");
-
-    if (response.ok) {
-      let data = await response.json();
-      setTempProducts(() => data);
-    }
   };
 
   const calcularVuelto = useCallback(
@@ -104,7 +89,7 @@ const Venta = () => {
   );
 
   useEffect(() => {
-    obtenerProductos();
+    // Component initialization
   }, []);
 
   // Recalculate change when payment type changes
@@ -125,27 +110,15 @@ const Venta = () => {
           return response.ok ? response.json() : Promise.reject(response);
         })
         .then((dataJson) => {
-          // Filtrar productos que no estén en el carrito y tengan stock
+          // Filtrar productos que no estén en el carrito
           const filteredProducts = dataJson.filter((item) => {
-            const isInCart = productsCart.some((cartItem) => 
-              cartItem[0].idProducto === item.idProducto
-            );
-            
-            if (!alreadyProductos) {
-              obtenerProductos();
-              setAlreadyProductos((prev) => !prev);
-            }
-            
-            const tempStock = tempProducts.filter(
-              (item2) => item2.idProducto === item.idProducto
+            const isInCart = productos.some((producto) => 
+              producto.idProducto === item.idProducto
             );
 
             return (
               item.precio > 0 &&
-              !isInCart &&
-              tempStock.length > 0 &&
-              tempStock[0].stock > 0 &&
-              tempStock[0].esActivo
+              !isInCart
             );
           });
 
@@ -184,32 +157,19 @@ const Venta = () => {
       cancelButtonText: "Volver",
       showLoaderOnConfirm: true,
       preConfirm: (inputValue) => {
-        obtenerProductos();
-
         if (isNaN(parseFloat(inputValue))) {
           Swal.showValidationMessage("Debe ingresar un valor númerico");
+        } else if (parseInt(inputValue) < 1) {
+          Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
         } else {
-          const tempStock = tempProducts.filter(
-            (item) => item.idProducto === producto.idProducto
-          );
-
-          if (parseInt(inputValue) > tempStock[0].stock) {
-            Swal.showValidationMessage(
-              `La cantidad excede al stock:${tempStock[0].stock}`
-            );
-          } else if (parseInt(inputValue) < 1) {
-            Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
-          } else {
-            setProductsCart(() => [...productsCart, tempStock]);
-
-            let nuevoProducto = {
-              idProducto: producto.idProducto,
-              nombre: producto.nombre,
-              descripcion: producto.descripcion,
-              cantidad: parseInt(inputValue),
-              precio: producto.precio,
-              total: producto.precio * parseFloat(inputValue),
-            };
+          let nuevoProducto = {
+            idProducto: producto.idProducto,
+            nombre: producto.nombre,
+            descripcion: producto.descripcion,
+            cantidad: parseInt(inputValue),
+            precio: producto.precio,
+            total: producto.precio * parseFloat(inputValue),
+          };
             let arrayProductos = [];
             arrayProductos.push(...productos);
             arrayProductos.push(nuevoProducto);
@@ -284,26 +244,16 @@ const Venta = () => {
         } else if (parseInt(inputValue) < 1) {
           Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
         } else {
-          // Verificar stock disponible
-          const tempStock = tempProducts.filter(
-            (item) => item.idProducto === producto.idProducto
+          // Actualizar la cantidad del producto en el carrito
+          const nuevaCantidad = parseInt(inputValue);
+          const nuevoTotal = producto.precio * nuevaCantidad;
+          
+          // Actualizar el producto en la lista de productos del carrito
+          const productosActualizados = productos.map(p => 
+            p.idProducto === producto.idProducto 
+              ? { ...p, cantidad: nuevaCantidad, total: nuevoTotal }
+              : p
           );
-
-          if (parseInt(inputValue) > tempStock[0]?.stock) {
-            Swal.showValidationMessage(
-              `La cantidad excede al stock disponible: ${tempStock[0]?.stock}`
-            );
-          } else {
-            // Actualizar la cantidad del producto en el carrito
-            const nuevaCantidad = parseInt(inputValue);
-            const nuevoTotal = producto.precio * nuevaCantidad;
-            
-            // Actualizar el producto en la lista de productos del carrito
-            const productosActualizados = productos.map(p => 
-              p.idProducto === producto.idProducto 
-                ? { ...p, cantidad: nuevaCantidad, total: nuevoTotal }
-                : p
-            );
             
             setProductos(productosActualizados);
             calcularTotal(productosActualizados);
@@ -316,10 +266,6 @@ const Venta = () => {
 
   const eliminarProducto = (id) => {
     let listaproductos = productos.filter((p) => p.idProducto !== id);
-    const tempProductsCart = productsCart.filter(
-      (item) => item[0].idProducto !== id
-    );
-    setProductsCart(() => tempProductsCart);
     setProductos(listaproductos);
     calcularTotal(listaproductos);
   };
@@ -338,7 +284,6 @@ const Venta = () => {
       t = st + imp; // Total con IVA
     }
 
-    setSubTotal(st.toFixed(2));
     setIgv(imp.toFixed(2));
     setTotal(t.toFixed(2));
   };
@@ -533,9 +478,7 @@ const Venta = () => {
     let venta = {
       documentoCliente: documentoCliente,
       nombreCliente: nombreCliente,
-      tipoDocumento: tipoDocumento,
       idUsuario: JSON.parse(user).idUsuario,
-      subTotal: parseFloat(subTotal),
       igv: parseFloat(igv),
       total: parseFloat(total),
       tipoPago: tipoPago,
@@ -545,8 +488,6 @@ const Venta = () => {
       vuelto: parseFloat(vuelto),
       listaProductos: productos,
     };
-
-    setProductsCart([]);
 
     fetch("api/venta/Registrar", {
       method: "POST",
@@ -592,7 +533,6 @@ const Venta = () => {
           }
         }
 
-        obtenerProductos();
       })
       .catch((error) => {
         Swal.fire("Opps!", "No se pudo crear la venta", "error");
@@ -816,29 +756,6 @@ const Venta = () => {
                   Detalle
                 </CardHeader>
                 <CardBody>
-                  <Row className="mb-2">
-                    <Col sm={12}>
-                      <InputGroup size="sm">
-                        <InputGroupText>Tipo:</InputGroupText>
-                        <Input
-                          type="select"
-                          value={tipoDocumento}
-                          onChange={(e) => setTipoDocumento(e.target.value)}
-                        >
-                          <option value="Boleta">Boleta</option>
-                          <option value="Factura">Factura</option>
-                        </Input>
-                      </InputGroup>
-                    </Col>
-                  </Row>
-                  <Row className="mb-2">
-                    <Col sm={12}>
-                      <InputGroup size="sm">
-                        <InputGroupText>Sub Total:C$</InputGroupText>
-                        <Input disabled value={subTotal} />
-                      </InputGroup>
-                    </Col>
-                  </Row>
                   <Row className="mb-2">
                     <Col sm={12}>
                       <InputGroup size="sm" className="Input-impuestos">

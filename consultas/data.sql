@@ -36,19 +36,19 @@ go
 
 
 -- INSERTAR PRODUCTOS (corregido)
-insert into Producto(codigo, nombre, marca, descripcion, idCategoria, stock, precio, esActivo) values
-('H101A', 'Martillo', 'Truper', 'Martillo de acero 16oz', 1, 50, 150.00, 1),
-('H102B', 'Desarmador', 'Stanley', 'Desarmador estrella', 1, 40, 85.00, 1),
-('E201C', 'Taladro', 'DeWalt', 'Taladro eléctrico 500W', 2, 25, 1200.00, 1),
-('E202D', 'Sierra Circular', 'Bosch', 'Sierra circular 7 pulgadas', 2, 15, 2200.00, 1),
-('C301E', 'Cemento', 'Cemex', 'Bolsa de cemento 50kg', 3, 100, 250.00, 1),
-('C302F', 'Lámina de Acero', 'Ternium', 'Lámina de acero galvanizado', 3, 30, 450.00, 1),
-('P401G', 'Pintura Blanca', 'Comex', 'Pintura blanca 19L', 4, 20, 900.00, 1),
-('P402H', 'Adhesivo', 'Resistol', 'Adhesivo industrial 1L', 4, 50, 75.00, 1),
-('I501I', 'Foco LED', 'Philips', 'Foco LED 9W', 5, 100, 40.00, 1),
-('I502J', 'Reflector LED', 'Osram', 'Reflector LED 20W', 5, 30, 250.00, 1),
-('A601K', 'Llave Mezcladora', 'Rotoplas', 'Llave mezcladora de bronce', 6, 20, 350.00, 1),
-('A602L', 'Tubo de Cobre', 'Nacobre', 'Tubo de cobre 3/4 pulgada', 6, 50, 180.00, 1);
+insert into Producto(nombre, descripcion, idCategoria, precio, esActivo) values
+('Martillo', 'Martillo de acero 16oz', 1, 150.00, 1),
+('Desarmador', 'Desarmador estrella', 1, 85.00, 1),
+('Taladro', 'Taladro eléctrico 500W', 2, 1200.00, 1),
+('Sierra Circular', 'Sierra circular 7 pulgadas', 2, 2200.00, 1),
+('Cemento', 'Bolsa de cemento 50kg', 3, 250.00, 1),
+('Lámina de Acero', 'Lámina de acero galvanizado', 3, 450.00, 1),
+('Pintura Blanca', 'Pintura blanca 19L', 4, 900.00, 1),
+('Adhesivo', 'Adhesivo industrial 1L', 4, 75.00, 1),
+('Foco LED', 'Foco LED 9W', 5, 40.00, 1),
+('Reflector LED', 'Reflector LED 20W', 5, 250.00, 1),
+('Llave Mezcladora', 'Llave mezcladora de bronce', 6, 350.00, 1),
+('Tubo de Cobre', 'Tubo de cobre 3/4 pulgada', 6, 180.00, 1);
 go
 
 
