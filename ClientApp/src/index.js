@@ -18,7 +18,6 @@ import Ingreso from './views/Ingreso';
 import Egreso from './views/Egreso';
 
 import UserProvider from './context/UserProvider';
-import SignalRProvider from './context/SignalRProvider';
 import PermissionProvider from './context/PermissionProvider';
 import ProtectedRoute from './componentes/ProtectedRoute';
 import AccessDenied from './views/AccessDenied';
@@ -30,7 +29,6 @@ root.render(
   <BrowserRouter>
     <UserProvider>
       <PermissionProvider>
-        <SignalRProvider>
         <Routes>
         {/*ACONTINUACION ESTABLECEMOS LAS RUTAS DE NUESTRO SISTEMA*/}
 
@@ -132,7 +130,6 @@ root.render(
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
-        </SignalRProvider>
       </PermissionProvider>
     </UserProvider>
   </BrowserRouter>

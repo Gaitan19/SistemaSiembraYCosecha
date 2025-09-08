@@ -21,14 +21,13 @@ const context = [
   "/api/egreso",
   "/api/cierre",
   "/api/permisos",
-  "/notificationHub",
 ];
 
 module.exports = function (app) {
   const appProxy = createProxyMiddleware(context, {
     target: target,
     secure: false,
-    ws: true, // Enable WebSocket proxying for SignalR
+    ws: true, // Enable WebSocket proxying
   });
 
   app.use(appProxy);

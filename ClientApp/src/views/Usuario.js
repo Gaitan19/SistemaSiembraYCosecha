@@ -22,7 +22,6 @@ import {
   exportToExcel,
   applySearchFilter,
 } from "../utils/exportHelpers";
-import { useSignalR } from "../context/SignalRProvider"; // Importa el hook de SignalR
 import ModalPermisos from "../componentes/ModalPermisos";
 
 const modeloUsuario = {
@@ -51,7 +50,6 @@ const Usuario = () => {
   const [cambiandoClave, setCambiandoClave] = useState(false);
   const [verModalPermisos, setVerModalPermisos] = useState(false);
   const [usuarioPermisos, setUsuarioPermisos] = useState(null);
-  const { subscribe } = useSignalR(); // Obtiene la función subscribe del contexto
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -166,90 +164,7 @@ const Usuario = () => {
     obtenerRoles();
     obtenerUsuarios();
 
-    // Configurar suscripciones a eventos de SignalR
-    const unsubscribeCreated = subscribe("UsuarioCreated", (nuevoUsuario) => {
-      // Agrega el nuevo usuario al inicio de la lista
-      setUsuarios((prev) => {
-        const newData = [nuevoUsuario, ...prev];
-        // Apply current filters to new data
-        const filtered = applyFilters(newData, searchTerm, statusFilter);
-        setFilteredUsuarios(filtered);
-        return newData;
-      });
-
-      // Muestra notificación toast
-      Swal.fire({
-        position: "top-end",
-        icon: "info",
-        title: "Nuevo usuario agregado",
-        text: `Se agregó: ${nuevoUsuario.nombre}`,
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true,
-      });
-    });
-
-    const unsubscribeUpdated = subscribe(
-      "UsuarioUpdated",
-      (usuarioActualizado) => {
-        // Actualiza el usuario en la lista
-        setUsuarios((prev) => {
-          const newData = prev.map((usr) =>
-            usr.idUsuario === usuarioActualizado.idUsuario
-              ? { ...usr, ...usuarioActualizado }
-              : usr
-          );
-          // Apply current filters to new data
-          const filtered = applyFilters(newData, searchTerm, statusFilter);
-          setFilteredUsuarios(filtered);
-          return newData;
-        });
-
-        // Muestra notificación toast
-        Swal.fire({
-          position: "top-end",
-          icon: "info",
-          title: "Usuario actualizado",
-          text: `Se actualizó: ${usuarioActualizado.nombre}`,
-          showConfirmButton: false,
-          timer: 3000,
-          toast: true,
-        });
-      }
-    );
-
-    const unsubscribeDeleted = subscribe("UsuarioDeleted", (id) => {
-      // Marca el usuario como inactivo
-      setUsuarios((prev) => {
-        const newData = prev.map((usr) =>
-          usr.idUsuario === id ? { ...usr, esActivo: false } : usr
-        );
-        // Apply current filters to new data
-        const filtered = applyFilters(newData, searchTerm, statusFilter);
-        setFilteredUsuarios(filtered);
-        return newData;
-      });
-
-      // Muestra notificación toast
-      Swal.fire({
-        position: "top-end",
-        icon: "info",
-        title: "Usuario eliminado",
-        text: "Un usuario fue eliminado",
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true,
-      });
-    });
-
-    // Limpieza de suscripciones al desmontar el componente
-    return () => {
-      unsubscribeCreated();
-      unsubscribeUpdated();
-      unsubscribeDeleted();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscribe]); // Removed searchTerm dependency
+  }, []);
 
   // Separate useEffect to handle search term and status filter changes
   useEffect(() => {
@@ -443,7 +358,7 @@ const Usuario = () => {
       });
 
       if (response.ok) {
-        // No es necesario obtenerUsuarios porque SignalR actualizará
+        await obtenerUsuarios();
         cerrarModal();
         Swal.fire(
           `${usuario.idUsuario === 0 ? "Creado" : "Actualizado"}`,
@@ -478,7 +393,7 @@ const Usuario = () => {
         })
           .then((response) => {
             if (response.ok) {
-              // No es necesario obtenerUsuarios porque SignalR actualizará
+              obtenerUsuarios();
               Swal.fire("Eliminado!", "El usuario fue eliminado.", "success");
             } else {
               return response.text().then((error) => {

@@ -21,7 +21,6 @@ import {
   exportToExcel,
   applySearchFilter,
 } from "../utils/exportHelpers";
-import { useSignalR } from "../context/SignalRProvider"; // Importa el hook de SignalR
 
 const modeloProveedor = {
   idProveedor: 0,
@@ -41,7 +40,6 @@ const Proveedor = () => {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [verModal, setVerModal] = useState(false);
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
-  const { subscribe } = useSignalR(); // Obtiene la función subscribe del contexto
 
   const handleChange = (e) => {
     let value;
@@ -145,93 +143,7 @@ const Proveedor = () => {
   useEffect(() => {
     obtenerProveedores();
 
-    // Configurar suscripciones a eventos de SignalR
-    const unsubscribeCreated = subscribe(
-      "ProveedorCreated",
-      (nuevoProveedor) => {
-        // Agrega el nuevo proveedor al inicio de la lista
-        setProveedores((prev) => {
-          const newData = [nuevoProveedor, ...prev];
-          // Apply current filters to new data
-          const filtered = applyFilters(newData, searchTerm, statusFilter);
-          setFilteredProveedores(filtered);
-          return newData;
-        });
-
-        // Muestra notificación toast
-        Swal.fire({
-          position: "top-end",
-          icon: "info",
-          title: "Nuevo proveedor agregado",
-          text: `Se agregó: ${nuevoProveedor.nombre}`,
-          showConfirmButton: false,
-          timer: 3000,
-          toast: true,
-        });
-      }
-    );
-
-    const unsubscribeUpdated = subscribe(
-      "ProveedorUpdated",
-      (proveedorActualizado) => {
-        // Actualiza el proveedor en la lista
-        setProveedores((prev) => {
-          const newData = prev.map((prov) =>
-            prov.idProveedor === proveedorActualizado.idProveedor
-              ? proveedorActualizado
-              : prov
-          );
-          // Apply current filters to new data
-          const filtered = applyFilters(newData, searchTerm, statusFilter);
-          setFilteredProveedores(filtered);
-          return newData;
-        });
-
-        // Muestra notificación toast
-        Swal.fire({
-          position: "top-end",
-          icon: "info",
-          title: "Proveedor actualizado",
-          text: `Se actualizó: ${proveedorActualizado.nombre}`,
-          showConfirmButton: false,
-          timer: 3000,
-          toast: true,
-        });
-      }
-    );
-
-    const unsubscribeDeleted = subscribe("ProveedorDeleted", (id) => {
-      // Marca el proveedor como inactivo
-      setProveedores((prev) => {
-        const newData = prev.map((prov) =>
-          prov.idProveedor === id ? { ...prov, esActivo: false } : prov
-        );
-        // Apply current filters to new data
-        const filtered = applyFilters(newData, searchTerm, statusFilter);
-        setFilteredProveedores(filtered);
-        return newData;
-      });
-
-      // Muestra notificación toast
-      Swal.fire({
-        position: "top-end",
-        icon: "info",
-        title: "Proveedor eliminado",
-        text: "Un proveedor fue eliminado",
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true,
-      });
-    });
-
-    // Limpieza de suscripciones al desmontar el componente
-    return () => {
-      unsubscribeCreated();
-      unsubscribeUpdated();
-      unsubscribeDeleted();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscribe]); // Removed searchTerm dependency
+  }, []);
 
   // Separate useEffect to handle search term and status filter changes
   useEffect(() => {
@@ -371,7 +283,7 @@ const Proveedor = () => {
       }
 
       if (response.ok) {
-        // No es necesario actualizar manualmente, SignalR se encargará
+        await obtenerProveedores();
         setProveedor(modeloProveedor);
         setVerModal(!verModal);
         Swal.fire(
@@ -409,7 +321,7 @@ const Proveedor = () => {
           });
 
           if (response.ok) {
-            // No es necesario actualizar manualmente, SignalR se encargará
+            obtenerProveedores();
             Swal.fire("Eliminado!", "El proveedor fue eliminado.", "success");
           } else {
             const errorData = await response.json();
