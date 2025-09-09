@@ -132,27 +132,29 @@ const Venta = () => {
         })
         .then((dataJson) => {
           // Filtrar productos que no estén en el carrito
-          const filteredProducts = dataJson.filter((item) => {
-            const isInCart = productsCart.some(
-              (cartItem) => cartItem[0].idProducto === item.idProducto
-            );
+          const filteredProducts = dataJson
+            .filter((item) => {
+              const isInCart = productsCart.some(
+                (cartItem) => cartItem[0].idProducto === item.idProducto
+              );
 
-            if (!alreadyProductos) {
-              obtenerProductos();
-              setAlreadyProductos((prev) => !prev);
-            }
+              const tempStock = tempProducts.find(
+                (item2) => item2.idProducto === item.idProducto
+              );
 
-            const tempStock = tempProducts.filter(
-              (item2) => item2.idProducto === item.idProducto
-            );
-
-            return (
-              item.precio > 0 &&
-              !isInCart &&
-              tempStock.length > 0 &&
-              tempStock[0].esActivo
-            );
-          });
+              return (
+                item.precio > 0 && !isInCart && tempStock && tempStock.esActivo
+              );
+            })
+            .map((item) => {
+              const tempStock = tempProducts.find(
+                (p) => p.idProducto === item.idProducto
+              );
+              return {
+                ...item,
+                unidades: tempStock ? tempStock.unidades : 0, // 👈 ahora sí unidades
+              };
+            });
 
           setA_Productos(filteredProducts);
           setMostrarProductos(true);
@@ -176,12 +178,15 @@ const Venta = () => {
   };
 
   const agregarProductoAlCarrito = async (producto) => {
+    const unidadesDisponibles = producto.unidades || 0;
+
     Swal.fire({
       title: producto.nombre || producto.descripcion,
-      text: "Ingrese la cantidad",
+      text: `Ingrese la cantidad (Stock disponible: ${unidadesDisponibles} unidades)`,
       input: "text",
       inputAttributes: {
         autocapitalize: "off",
+        placeholder: `Máximo ${unidadesDisponibles} unidades`,
       },
       showCancelButton: true,
       confirmButtonText: "Aceptar",
@@ -195,6 +200,17 @@ const Venta = () => {
         } else if (parseInt(inputValue) < 1) {
           Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
         } else {
+          // Validar que la cantidad no supere las unidades disponibles
+          const cantidadSolicitada = parseInt(inputValue);
+          const unidadesDisponibles = producto.unidades || 0;
+
+          if (cantidadSolicitada > unidadesDisponibles) {
+            Swal.showValidationMessage(
+              `La cantidad solicitada (${cantidadSolicitada}) supera el stock disponible (${unidadesDisponibles} unidades)`
+            );
+            return;
+          }
+
           const tempStock = tempProducts.filter(
             (item) => item.idProducto === producto.idProducto
           );
@@ -245,6 +261,13 @@ const Venta = () => {
       selector: (row) => row.precio,
       sortable: true,
       cell: (row) => `C$${row.precio}`,
+      width: "100px",
+    },
+    {
+      name: "Unidades",
+      selector: (row) => row.unidades,
+      sortable: true,
+      cell: (row) => row.unidades,
       width: "100px",
     },
     {

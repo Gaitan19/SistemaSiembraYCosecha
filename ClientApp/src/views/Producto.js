@@ -29,6 +29,7 @@ const modeloProducto = {
   idCategoria: 0,
   idProveedor: 0,
   precio: 0,
+  unidades: 0,
   esActivo: true,
 };
 
@@ -43,6 +44,9 @@ const Producto = () => {
   const [proveedores, setProveedores] = useState([]);
   const [verModal, setVerModal] = useState(false);
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
+  const [verModalUnidades, setVerModalUnidades] = useState(false);
+  const [productoParaUnidades, setProductoParaUnidades] = useState(null);
+  const [unidadesAAgregar, setUnidadesAAgregar] = useState("");
 
   const handleChange = (e) => {
     let value;
@@ -51,6 +55,8 @@ const Producto = () => {
       value = e.target.value;
     } else if (e.target.name === "esActivo") {
       value = e.target.value === "true" ? true : false;
+    } else if (e.target.name === "unidades") {
+      value = parseInt(e.target.value) || 0;
     } else {
       value = e.target.value;
     }
@@ -217,6 +223,12 @@ const Producto = () => {
       cell: (row) => row.idProveedorNavigation?.nombre || "Sin proveedor",
     },
     {
+      name: "Unidades",
+      selector: (row) => row.unidades,
+      sortable: true,
+      cell: (row) => row.unidades || 0,
+    },
+    {
       name: "Estado",
       selector: (row) => row.esActivo,
       sortable: true,
@@ -250,6 +262,16 @@ const Producto = () => {
             onClick={() => abrirEditarModal(row)}
           >
             <i className="fas fa-pen-alt"></i>
+          </Button>
+
+          <Button
+            color="success"
+            size="sm"
+            className="mr-2"
+            onClick={() => abrirModalAgregarUnidades(row)}
+            title="Agregar Unidades"
+          >
+            <i className="fas fa-plus-circle mr-2"></i>
           </Button>
 
           <Button
@@ -301,6 +323,64 @@ const Producto = () => {
     setProducto(modeloProducto);
     setModoSoloLectura(false);
     setVerModal(!verModal);
+  };
+
+  const abrirModalAgregarUnidades = (data) => {
+    setProductoParaUnidades(data);
+    setUnidadesAAgregar("");
+    setVerModalUnidades(true);
+  };
+
+  const cerrarModalUnidades = () => {
+    setProductoParaUnidades(null);
+    setUnidadesAAgregar("");
+    setVerModalUnidades(false);
+  };
+
+  const agregarUnidades = async () => {
+    try {
+      // Validations
+      if (!unidadesAAgregar || unidadesAAgregar.trim() === "") {
+        Swal.fire("Advertencia", "Debe ingresar una cantidad de unidades", "warning");
+        return;
+      }
+
+      const unidades = parseInt(unidadesAAgregar);
+      if (isNaN(unidades)) {
+        Swal.fire("Advertencia", "Debe ingresar un número entero válido", "warning");
+        return;
+      }
+
+      if (unidades <= 0) {
+        Swal.fire("Advertencia", "Debe ingresar un número positivo", "warning");
+        return;
+      }
+
+      const response = await fetch(`api/producto/AgregarUnidades/${productoParaUnidades.idProducto}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify(unidades),
+      });
+
+      if (response.ok) {
+        await obtenerProductos();
+        cerrarModalUnidades();
+        
+        Swal.fire(
+          "Éxito",
+          `Se agregaron ${unidades} unidades al producto`,
+          "success"
+        );
+      } else {
+        const errorText = await response.text();
+        Swal.fire("Error", `No se pudieron agregar las unidades: ${errorText}`, "error");
+      }
+    } catch (error) {
+      console.error("Error al agregar unidades:", error);
+      Swal.fire("Error", "Ocurrió un error inesperado", "error");
+    }
   };
 
   const guardarCambios = async () => {
@@ -584,6 +664,21 @@ const Producto = () => {
                   />
                 </FormGroup>
               </Col>
+              <Col sm={6}>
+                <FormGroup>
+                  <Label>Unidades</Label>
+                  <Input
+                    bsSize="sm"
+                    name="unidades"
+                    type="number"
+                    min={0}
+                    step="1"
+                    onChange={handleChange}
+                    value={producto.unidades}
+                    readOnly={modoSoloLectura}
+                  />
+                </FormGroup>
+              </Col>
             </Row>
             <Row>
               <Col sm={6}>
@@ -615,6 +710,37 @@ const Producto = () => {
             </Button>
           </ModalFooter>
         </form>
+      </Modal>
+
+      {/* Modal para agregar unidades */}
+      <Modal isOpen={verModalUnidades} toggle={cerrarModalUnidades}>
+        <ModalHeader toggle={cerrarModalUnidades}>
+          Agregar Unidades - {productoParaUnidades?.nombre}
+        </ModalHeader>
+        <ModalBody>
+          <FormGroup>
+            <Label>Unidades actuales: {productoParaUnidades?.unidades || 0}</Label>
+          </FormGroup>
+          <FormGroup>
+            <Label>Ingrese las unidades a agregar:</Label>
+            <Input
+              type="number"
+              min="1"
+              step="1"
+              value={unidadesAAgregar}
+              onChange={(e) => setUnidadesAAgregar(e.target.value)}
+              placeholder="Ingrese un número entero positivo"
+            />
+          </FormGroup>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="success" onClick={agregarUnidades}>
+            Agregar
+          </Button>
+          <Button color="secondary" onClick={cerrarModalUnidades}>
+            Cancelar
+          </Button>
+        </ModalFooter>
       </Modal>
     </>
   );
