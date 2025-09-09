@@ -54,6 +54,13 @@ begin
 			insert into DetalleVenta(idVenta,idProducto,cantidad,precio,total) 
 			select @idventa,IdProducto,Cantidad,Precio,Total from @tbproductos
 
+			-- Actualizar stock de productos vendidos (solo si gestionan inventario)
+			update Producto set 
+				unidades = unidades - tbp.Cantidad
+			from Producto p
+			inner join @tbproductos tbp on p.idProducto = tbp.IdProducto
+			where p.unidades is not null
+
 			-- Registrar ingreso con el monto que paga el cliente
 			insert into Ingreso(descripcion,monto,tipoPago,tipoDinero,idUsuario,esActivo)
 			values ('Pago de venta #' + @nrodocgenerado,@montoPago,@tipoPago,@tipoDinero,@idUsuario,1)

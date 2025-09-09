@@ -10349,7 +10349,7 @@ a:focus {
   left: calc(6.5rem + 1.5rem / 2);
   position: absolute;
   top: 2px;
-  z-index: 1;
+  z-index: 2;
 }
 
 .sidebar .nav-item .collapse .collapse-inner {

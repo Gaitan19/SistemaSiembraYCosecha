@@ -320,7 +320,7 @@ const Categoria = () => {
             </CardHeader>
             <CardBody>
               <Row className="mb-3">
-                <Col sm="2">
+                <Col sm="2" className="mb-3 my-sm-0">
                   <Input
                     type="select"
                     value={statusFilter}
@@ -336,7 +336,7 @@ const Categoria = () => {
                     <option value="inactivos">Inactivos</option>
                   </Input>
                 </Col>
-                <Col sm="3">
+                <Col sm="3" className="mb-3 my-sm-0">
                   <Input
                     type="text"
                     placeholder="Buscar..."

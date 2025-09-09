@@ -204,7 +204,7 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
         )}
         <p className="ticket__info">
           <strong>Cambio:</strong>{" "}
-          {detalleVenta.vuelto > 0 && `C$${detalleVenta.vuelto}`}
+          {detalleVenta.vuelto > 0 ? `C$${detalleVenta.vuelto}` : "C$0"}
         </p>
       </div>
       {(detalleVenta.nombreCliente || detalleVenta.numeroRuc) && (

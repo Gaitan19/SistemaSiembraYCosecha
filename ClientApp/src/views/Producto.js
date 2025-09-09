@@ -126,7 +126,11 @@ const Producto = () => {
       },
       {
         header: "Proveedor",
-        accessor: (row) => row.idProveedorNavigation?.nombre || "",
+        accessor: (row) => row.idProveedorNavigation?.nombre || "Sin proveedor",
+      },
+      {
+        header: "Unidades",
+        accessor: (row) => (row.unidades !== null && row.unidades !== undefined ? row.unidades : "Sin unidades"),
       },
       { header: "Precio", accessor: (row) => `C$${row.precio}` },
       {
@@ -144,7 +148,8 @@ const Producto = () => {
       Nombre: prod.nombre,
       Descripción: prod.descripcion,
       Categoría: prod.idCategoriaNavigation?.descripcion || "",
-      Proveedor: prod.idProveedorNavigation?.nombre || "",
+      Proveedor: prod.idProveedorNavigation?.nombre || "Sin proveedor",
+      Unidades: prod.unidades !== null && prod.unidades !== undefined ? prod.unidades : "Sin unidades",
       Precio: `C$${prod.precio}`,
       Estado: prod.esActivo ? "Activo" : "No Activo",
     }));
@@ -242,12 +247,6 @@ const Producto = () => {
       selector: (row) => row.idCategoriaNavigation,
       sortable: true,
       cell: (row) => row.idCategoriaNavigation.descripcion,
-    },
-    {
-      name: "Proveedor",
-      selector: (row) => row.idProveedorNavigation,
-      sortable: true,
-      cell: (row) => row.idProveedorNavigation?.nombre || "Sin proveedor",
     },
     {
       name: "Unidades",
@@ -532,7 +531,7 @@ const Producto = () => {
             </CardHeader>
             <CardBody>
               <Row className="mb-3">
-                <Col sm="2">
+                <Col sm="2" className="mb-3 my-sm-0">
                   <Input
                     type="select"
                     value={statusFilter}
@@ -548,7 +547,7 @@ const Producto = () => {
                     <option value="inactivos">Inactivos</option>
                   </Input>
                 </Col>
-                <Col sm="3">
+                <Col sm="3" className="mb-3 my-sm-0">
                   <Input
                     type="text"
                     placeholder="Buscar..."
