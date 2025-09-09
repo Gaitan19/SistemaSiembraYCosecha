@@ -3,6 +3,7 @@ using ReactVentas.Models;
 using ReactVentas.Services;
 using ReactVentas.Interfaces;
 using ReactVentas.Repositories;
+using ReactVentas.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,7 +50,7 @@ else
 
 
 app.UseHttpsRedirection();
-
+app.UseSucursalContext();
 app.UseStaticFiles();
 app.UseRouting();
 

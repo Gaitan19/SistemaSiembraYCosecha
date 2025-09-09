@@ -45,6 +45,13 @@ namespace ReactVentas.Controllers
         {
             try
             {
+                // Validate that employees must have a branch assigned
+                if (request.IdRol == 2 && (request.IdSucursal == null || request.IdSucursal <= 0))
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, 
+                        new { message = "Employees must have a branch assigned" });
+                }
+
                 // Hashear la contraseña antes de guardar
                 request.Clave = _passwordService.HashPassword(request.Clave);
 
@@ -138,6 +145,38 @@ namespace ReactVentas.Controllers
             catch (Exception ex)
             {
                 // Return a 500 Internal Server Error status if an exception occurs.
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPut]
+        [Route("AsignarSucursal/{usuarioId:int}")]
+        public async Task<IActionResult> AsignarSucursal(int usuarioId, [FromBody] int? sucursalId)
+        {
+            try
+            {
+                var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
+                if (usuario == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, "User not found");
+                }
+
+                // Validate that employees must have a branch assigned, but administrators can have null
+                if (usuario.IdRol == 2 && (sucursalId == null || sucursalId <= 0))
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, 
+                        new { message = "Employees must have a branch assigned" });
+                }
+
+                usuario.IdSucursal = sucursalId;
+                await _usuarioRepository.UpdateAsync(usuario);
+                await _usuarioRepository.SaveChangesAsync();
+
+                return StatusCode(StatusCodes.Status200OK, 
+                    new { message = "Branch assignment updated successfully" });
+            }
+            catch (Exception ex)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
