@@ -409,11 +409,11 @@ const HistorialVenta = () => {
           <Row>
             <Col sm={4}>
               <FormGroup>
-                <Label>Monto Vuelto:</Label>
+                <Label>Monto Cambio:</Label>
                 <Input
                   bsSize="sm"
                   disabled
-                  value={`C$${detalleVenta.vuelto || "N/A"}`}
+                  value={`C$${detalleVenta.vuelto || "0"}`}
                 />
               </FormGroup>
             </Col>

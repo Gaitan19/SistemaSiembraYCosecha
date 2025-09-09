@@ -104,10 +104,22 @@ const Venta = () => {
   // Recalculate change when payment type changes
   useEffect(() => {
     if (tipoPago === "Transferencia") {
+      // Si el tipo de dinero es dólares, convertir
+      if (tipoDinero === "Dolares") {
+        if (tipoCambio > 0) {
+          const montoEnDolares = (
+            parseFloat(total) / parseFloat(tipoCambio)
+          ).toFixed(2);
+          setMontoPago(montoEnDolares);
+        }
+      } else {
+        // Si es en córdobas, asignar el mismo total
+        setMontoPago(parseFloat(total).toFixed(2));
+      }
       setVuelto(0);
     } else {
       // For Cordobas and dollars, recalculate automatically
-      calcularVuelto(montoPago); 
+      calcularVuelto(montoPago);
     }
   }, [tipoPago, tipoDinero, total, montoPago, calcularVuelto]);
 
@@ -121,15 +133,15 @@ const Venta = () => {
         .then((dataJson) => {
           // Filtrar productos que no estén en el carrito
           const filteredProducts = dataJson.filter((item) => {
-            const isInCart = productsCart.some((cartItem) => 
-              cartItem[0].idProducto === item.idProducto
+            const isInCart = productsCart.some(
+              (cartItem) => cartItem[0].idProducto === item.idProducto
             );
-            
+
             if (!alreadyProductos) {
               obtenerProductos();
               setAlreadyProductos((prev) => !prev);
             }
-            
+
             const tempStock = tempProducts.filter(
               (item2) => item2.idProducto === item.idProducto
             );
@@ -141,7 +153,6 @@ const Venta = () => {
               tempStock[0].esActivo
             );
           });
-
 
           setA_Productos(filteredProducts);
           setMostrarProductos(true);
@@ -166,7 +177,7 @@ const Venta = () => {
 
   const agregarProductoAlCarrito = async (producto) => {
     Swal.fire({
-      title: (producto.nombre || producto.descripcion),
+      title: producto.nombre || producto.descripcion,
       text: "Ingrese la cantidad",
       input: "text",
       inputAttributes: {
@@ -187,7 +198,7 @@ const Venta = () => {
           const tempStock = tempProducts.filter(
             (item) => item.idProducto === producto.idProducto
           );
-          
+
           setProductsCart(() => [...productsCart, tempStock]);
 
           let nuevoProducto = {
@@ -204,7 +215,7 @@ const Venta = () => {
 
           setProductos((anterior) => [...anterior, nuevoProducto]);
           calcularTotal(arrayProductos);
-          
+
           // Ocultar la tabla y limpiar búsqueda
           setA_Busqueda("");
           setA_Productos([]);
@@ -274,14 +285,14 @@ const Venta = () => {
           // Actualizar la cantidad del producto en el carrito
           const nuevaCantidad = parseInt(inputValue);
           const nuevoTotal = producto.precio * nuevaCantidad;
-          
+
           // Actualizar el producto en la lista de productos del carrito
-          const productosActualizados = productos.map(p => 
-            p.idProducto === producto.idProducto 
+          const productosActualizados = productos.map((p) =>
+            p.idProducto === producto.idProducto
               ? { ...p, cantidad: nuevaCantidad, total: nuevoTotal }
               : p
           );
-          
+
           setProductos(productosActualizados);
           calcularTotal(productosActualizados);
         }
@@ -802,10 +813,14 @@ const Venta = () => {
                           step="0.01"
                           value={montoPago}
                           onChange={(e) => {
-                            const valor = e.target.value;
-                            setMontoPago(valor);
-                            calcularVuelto(valor);
+                            if (tipoPago !== "Transferencia") {
+                              // Solo permitir modificar si NO es transferencia
+                              const valor = e.target.value;
+                              setMontoPago(valor);
+                              calcularVuelto(valor);
+                            }
                           }}
+                          readOnly={tipoPago === "Transferencia"}
                           placeholder="Monto que paga el cliente"
                         />
                       </InputGroup>
@@ -814,9 +829,7 @@ const Venta = () => {
                   <Row>
                     <Col sm={12}>
                       <InputGroup size="sm">
-                        <InputGroupText>
-                          Vuelto:C$
-                        </InputGroupText>
+                        <InputGroupText>Vuelto:C$</InputGroupText>
                         <Input
                           disabled
                           value={vuelto.toFixed(2)}
