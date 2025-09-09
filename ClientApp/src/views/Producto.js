@@ -56,7 +56,12 @@ const Producto = () => {
     } else if (e.target.name === "esActivo") {
       value = e.target.value === "true" ? true : false;
     } else if (e.target.name === "unidades") {
-      value = e.target.value === "" ? null : parseInt(e.target.value) || null;
+      if (e.target.value === "" || e.target.value === null || e.target.value === undefined) {
+        value = null;
+      } else {
+        const parsedValue = parseInt(e.target.value);
+        value = isNaN(parsedValue) ? null : parsedValue;
+      }
     } else {
       value = e.target.value;
     }
