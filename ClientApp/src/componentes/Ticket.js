@@ -110,8 +110,12 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
         <p className="ticket__title">
           SIEMBRAS & COSECHAS
           <br />
-          <span style={{ fontSize: "10px" }}>EXPERTOS EN BATIDOS</span>
+          <span style={{ fontSize: "10px", textTransform: "none" }}>
+            Expertos en batidos
+          </span>
         </p>
+
+        <p className="ticket__address">Empalme San Benito</p>
 
         <hr className="ticket__separator" />
       </div>
@@ -224,7 +228,7 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
       )}
       <div className="ticket__footer" style={{ textAlign: "center" }}>
         <p className="ticket__footer-title">
-          <strong>¡Gracias por su visita!</strong>
+          <strong>¡Gracias por su preferencia!</strong>
         </p>
       </div>
     </div>
