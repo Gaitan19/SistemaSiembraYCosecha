@@ -271,7 +271,7 @@ const Producto = () => {
             onClick={() => abrirModalAgregarUnidades(row)}
             title="Agregar Unidades"
           >
-            + Unidades
+            <i className="fas fa-plus-circle mr-2"></i>
           </Button>
 
           <Button
