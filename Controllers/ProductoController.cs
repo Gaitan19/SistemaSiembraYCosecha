@@ -85,6 +85,35 @@ namespace ReactVentas.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("AgregarUnidades/{id:int}")]
+        public async Task<IActionResult> AgregarUnidades(int id, [FromBody] int unidadesAAgregar)
+        {
+            // Adds units to an existing product.
+            try
+            {
+                var producto = await _productoRepository.GetByIdAsync(id);
+                if (producto == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, "Producto not found");
+                }
+
+                // Add units to current amount
+                producto.Unidades = (producto.Unidades ?? 0) + unidadesAAgregar;
+                
+                await _productoRepository.UpdateAsync(producto);
+                await _productoRepository.SaveChangesAsync();
+
+                // Returns a 200 OK status on successful update.
+                return StatusCode(StatusCodes.Status200OK, "ok");
+            }
+            catch (Exception ex)
+            {
+                // Returns a 500 Internal Server Error status if an exception occurs during update.
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
         [HttpDelete]
         [Route("Eliminar/{id:int}")]
         public async Task<IActionResult> Eliminar(int id)

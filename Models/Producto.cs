@@ -53,6 +53,12 @@ namespace ReactVentas.Models
         public decimal? Precio { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of units available for this product.
+        /// Optional field.
+        /// </summary>
+        public int? Unidades { get; set; }
+
+        /// <summary>
         /// Gets or sets the active status of the product.
         /// Optional field. A value of true indicates the product is active.
         /// </summary>

@@ -36,7 +36,7 @@ go
 
 
 -- INSERTAR PRODUCTOS (corregido)
-insert into Producto(codigo, nombre, marca, descripcion, idCategoria, stock, precio, esActivo) values
+insert into Producto(codigo, nombre, marca, descripcion, idCategoria, unidades, precio, esActivo) values
 ('H101A', 'Martillo', 'Truper', 'Martillo de acero 16oz', 1, 50, 150.00, 1),
 ('H102B', 'Desarmador', 'Stanley', 'Desarmador estrella', 1, 40, 85.00, 1),
 ('E201C', 'Taladro', 'DeWalt', 'Taladro eléctrico 500W', 2, 25, 1200.00, 1),

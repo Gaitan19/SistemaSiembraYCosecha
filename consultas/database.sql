@@ -54,7 +54,7 @@ marca varchar(100),
 descripcion varchar(200),
 idCategoria int references Categoria(idCategoria),
 idProveedor int references Proveedor(idProveedor),
-stock int,
+unidades int,
 precio decimal(10,2),
 esActivo bit,
 fechaRegistro datetime default getdate()

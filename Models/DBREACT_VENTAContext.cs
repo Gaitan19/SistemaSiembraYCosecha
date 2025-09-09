@@ -136,6 +136,9 @@ namespace ReactVentas.Models
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("precio");
 
+                entity.Property(e => e.Unidades)
+                    .HasColumnName("unidades");
+
                 entity.HasOne(d => d.IdCategoriaNavigation)
                     .WithMany(p => p.Productos)
                     .HasForeignKey(d => d.IdCategoria)

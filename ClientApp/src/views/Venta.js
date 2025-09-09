@@ -176,12 +176,15 @@ const Venta = () => {
   };
 
   const agregarProductoAlCarrito = async (producto) => {
+    const unidadesDisponibles = producto.unidades || 0;
+    
     Swal.fire({
       title: producto.nombre || producto.descripcion,
-      text: "Ingrese la cantidad",
+      text: `Ingrese la cantidad (Stock disponible: ${unidadesDisponibles} unidades)`,
       input: "text",
       inputAttributes: {
         autocapitalize: "off",
+        placeholder: `Máximo ${unidadesDisponibles} unidades`
       },
       showCancelButton: true,
       confirmButtonText: "Aceptar",
@@ -195,6 +198,17 @@ const Venta = () => {
         } else if (parseInt(inputValue) < 1) {
           Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
         } else {
+          // Validar que la cantidad no supere las unidades disponibles
+          const cantidadSolicitada = parseInt(inputValue);
+          const unidadesDisponibles = producto.unidades || 0;
+          
+          if (cantidadSolicitada > unidadesDisponibles) {
+            Swal.showValidationMessage(
+              `La cantidad solicitada (${cantidadSolicitada}) supera el stock disponible (${unidadesDisponibles} unidades)`
+            );
+            return;
+          }
+
           const tempStock = tempProducts.filter(
             (item) => item.idProducto === producto.idProducto
           );
