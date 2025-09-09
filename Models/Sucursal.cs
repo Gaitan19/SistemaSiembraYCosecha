@@ -21,6 +21,7 @@ namespace ReactVentas.Models
             Egresos = new HashSet<Egreso>();
             Proveedores = new HashSet<Proveedor>();
             Categorias = new HashSet<Categoria>();
+            NumeroDocumentos = new HashSet<NumeroDocumento>();
         }
 
         /// <summary>
@@ -85,5 +86,10 @@ namespace ReactVentas.Models
         /// Navigation property to the collection of categories associated with the branch.
         /// </summary>
         public virtual ICollection<Categoria> Categorias { get; set; }
+
+        /// <summary>
+        /// Navigation property to the collection of document numbers associated with the branch.
+        /// </summary>
+        public virtual ICollection<NumeroDocumento> NumeroDocumentos { get; set; }
     }
 }

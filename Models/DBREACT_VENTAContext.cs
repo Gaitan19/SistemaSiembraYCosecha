@@ -105,10 +105,18 @@ namespace ReactVentas.Models
                     .ValueGeneratedNever()
                     .HasColumnName("id");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.FechaRegistro)
                     .HasColumnType("datetime")
                     .HasColumnName("fechaRegistro")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.NumeroDocumentos)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__NumeroDocumento__idSucursal__4AB81AF0");
             });
 
             modelBuilder.Entity<Producto>(entity =>

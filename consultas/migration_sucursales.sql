@@ -119,4 +119,18 @@ BEGIN
 END
 GO
 
+-- Step 9: Add idSucursal column to NumeroDocumento table (nullable for compatibility)
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('NumeroDocumento') AND name = 'idSucursal')
+BEGIN
+    ALTER TABLE NumeroDocumento ADD idSucursal int NULL
+    
+    -- Add foreign key constraint
+    ALTER TABLE NumeroDocumento ADD CONSTRAINT FK_NumeroDocumento_Sucursal 
+    FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal)
+    
+    -- Update existing document numbers to default sucursal
+    UPDATE NumeroDocumento SET idSucursal = 1 WHERE idSucursal IS NULL
+END
+GO
+
 PRINT 'Migration completed successfully - Sucursal functionality added'
