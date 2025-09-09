@@ -6,9 +6,7 @@ import { UserContext } from "../context/UserProvider";
 const modelo = {
     nombre: "",
     correo: "",
-    idRolNavigation: {
-        descripcion :""
-    }
+    rolDescripcion: ""
 }
 
 const Inicio = () => {
@@ -46,7 +44,7 @@ const Inicio = () => {
                     </FormGroup>
                     <FormGroup>
                         <Label>Rol</Label>
-                        <Input disabled value={dataUser.idRolNavigation.descripcion}/>
+                        <Input disabled value={dataUser.rolDescripcion}/>
                     </FormGroup>
                 </Col>
                 <Col sm={3}>
