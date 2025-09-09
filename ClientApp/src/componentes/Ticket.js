@@ -115,7 +115,7 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
           </span>
         </p>
 
-        <p className="ticket__address">Empalme San Benito</p>
+        <p className="ticket__address">Empalme de San Benito</p>
 
         <hr className="ticket__separator" />
       </div>
