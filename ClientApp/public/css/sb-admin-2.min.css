@@ -11631,7 +11631,7 @@ a:focus {
     left: calc(6.5rem + 1.5rem / 2);
     position: absolute;
     top: 2px;
-    z-index: 1;
+    z-index: 2;
 }
 
 .sidebar .nav-item .collapse .collapse-inner {
@@ -12733,4 +12733,16 @@ footer.sticky-footer .copyright {
 
 body.sidebar-toggled footer.sticky-footer {
     width: 100%;
+}
+
+
+@media (max-width: 575.98px) {
+  .card-header .row .col-sm-6 {
+    text-align: center;
+  }
+
+  .card-header .row .text-right.col-sm-6 {
+    display: flex;
+    justify-content: center;
+  }
 }
