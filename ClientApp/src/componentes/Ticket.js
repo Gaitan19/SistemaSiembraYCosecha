@@ -104,12 +104,15 @@ import React from "react";
 import "../views/css/Ticket.css";
 
 const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
-
-  console.log("detalleVenta :>> ", detalleVenta);
   return (
     <div ref={ref} id="ticket-impresion" className="ticket">
       <div className="ticket__header">
-        <h4 className="ticket__title">SIEMBRAS & COSECHAS</h4>
+        <p className="ticket__title">
+          SIEMBRAS & COSECHAS
+          <br />
+          <span style={{ fontSize: "10px" }}>EXPERTOS EN BATIDOS</span>
+        </p>
+
         <hr className="ticket__separator" />
       </div>
       <div className="ticket__body">
@@ -120,11 +123,10 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
           <strong>Moneda:</strong> {detalleVenta.tipoDinero}
         </p>
         <p className="ticket__info">
-          <strong>Fecha Registro:</strong> {detalleVenta.fechaRegistro} {detalleVenta.horaRegistro}
+          <strong>Fecha Registro:</strong> {detalleVenta.fechaRegistro}{" "}
+          {detalleVenta.horaRegistro}
         </p>
-        <p className="ticket__info">
-          <strong>Celular:</strong> 8764-4751
-        </p>
+
         <p className="ticket__info">
           <strong>Ticket N.º:</strong> {detalleVenta.numeroDocumento}
         </p>
@@ -178,18 +180,32 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
         <hr className="ticket__separator" />
 
         <p className="ticket__info">
-          <strong>Total:</strong> C${detalleVenta.total}
+          <strong>Total a pagar:</strong> C${detalleVenta.total}
         </p>
-         <p className="ticket__info">
-          <strong>Monto Pago:</strong> {detalleVenta.tipoDinero === 'Cordobas' ? 'C$' : '$'}{detalleVenta.montoPago || "N/A"}
+        <p className="ticket__info">
+          <strong>Efectivo entregado:</strong>{" "}
+          {detalleVenta.tipoDinero === "Cordobas" ? "C$" : "$"}
+          {detalleVenta.montoPago || "N/A"}
         </p>
-         <p className="ticket__info">
-          <strong>Cambio:</strong> {detalleVenta.vuelto > 0 && `C$${detalleVenta.vuelto}`}
+        {(detalleVenta.tipoDinero === "Dolares" && detalleVenta.tipoPago === "Efectivo") && (
+          <>
+            <p className="ticket__info">
+              <strong>Tipo de cambio dólar:</strong> C${detalleVenta.tipoCambio}
+            </p>
+
+             <p className="ticket__info">
+              <strong>Efectivo en Córdoba:</strong> C${detalleVenta.montoPago * detalleVenta.tipoCambio}
+            </p>
+          </>
+        )}
+        <p className="ticket__info">
+          <strong>Cambio:</strong>{" "}
+          {detalleVenta.vuelto > 0 && `C$${detalleVenta.vuelto}`}
         </p>
       </div>
       {(detalleVenta.nombreCliente || detalleVenta.numeroRuc) && (
         <div className="ticket__footer">
-          <p className="ticket__footer-title">
+          <p className="ticket__footer-title" style={{ textAlign: "left" }}>
             <strong>Datos del Cliente:</strong>
           </p>
 
@@ -206,6 +222,11 @@ const Ticket = React.forwardRef(({ detalleVenta }, ref) => {
           )}
         </div>
       )}
+      <div className="ticket__footer" style={{ textAlign: "center" }}>
+        <p className="ticket__footer-title">
+          <strong>¡Gracias por su visita!</strong>
+        </p>
+      </div>
     </div>
   );
 });

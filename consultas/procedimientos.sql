@@ -13,6 +13,7 @@ create procedure sp_RegistrarVenta(
 @numeroRuc varchar(50),
 @montoPago decimal(10,2),
 @vuelto decimal(10,2),
+@tipoCambio decimal(10,2),
 @nroDocumento varchar(6) output
 )
 as
@@ -44,8 +45,8 @@ begin
 			
 			set @nrodocgenerado =  RIGHT('000000' + convert(varchar(max),@nro),6)
 
-			insert into Venta(numeroDocumento,idUsuario,documentoCliente,nombreCliente,total,tipoPago,tipoDinero,numeroRuc,montoPago,vuelto) 
-			values (@nrodocgenerado,@idUsuario,@documentoCliente,@nombreCliente,@total,@tipoPago,@tipoDinero,@numeroRuc,@montoPago,@vuelto)
+			insert into Venta(numeroDocumento,idUsuario,documentoCliente,nombreCliente,total,tipoPago,tipoDinero,numeroRuc,montoPago,vuelto,tipoCambio) 
+			values (@nrodocgenerado,@idUsuario,@documentoCliente,@nombreCliente,@total,@tipoPago,@tipoDinero,@numeroRuc,@montoPago,@vuelto,@tipoCambio)
 
 
 			set @idventa = SCOPE_IDENTITY()

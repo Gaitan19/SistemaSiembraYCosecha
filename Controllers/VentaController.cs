@@ -94,6 +94,7 @@ namespace ReactVentas.Controllers
                     cmd.Parameters.Add("numeroRuc", SqlDbType.VarChar, 50).Value = request.numeroRuc ?? "";
                     cmd.Parameters.Add("montoPago", SqlDbType.Decimal).Value = request.montoPago;
                     cmd.Parameters.Add("vuelto", SqlDbType.Decimal).Value = request.vuelto;
+                    cmd.Parameters.Add("tipoCambio", SqlDbType.Decimal).Value = request.tipoCambio;
                     cmd.Parameters.Add("nroDocumento", SqlDbType.VarChar, 6).Direction = ParameterDirection.Output;
                     cmd.ExecuteNonQuery();
                     numeroDocumento = cmd.Parameters["nroDocumento"].Value.ToString();
@@ -150,6 +151,7 @@ namespace ReactVentas.Controllers
                             TipoPago = v.TipoPago,
                             Vuelto = v.Vuelto,
                             MontoPago = v.MontoPago,
+                            TipoCambio = v.TipoCambio,
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
                                 Producto = d.IdProductoNavigation.Nombre,
@@ -182,6 +184,7 @@ namespace ReactVentas.Controllers
                             TipoPago = v.TipoPago,
                             Vuelto = v.Vuelto,
                             MontoPago = v.MontoPago,
+                            TipoCambio = v.TipoCambio,
                             Detalle = v.DetalleVenta.Select(d => new DtoDetalleVenta()
                             {
                                 Producto = d.IdProductoNavigation.Nombre,

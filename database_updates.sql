@@ -25,3 +25,7 @@ UPDATE Egreso SET esActivo = 1 WHERE esActivo IS NULL;
 -- Ensure idProveedor column in Producto table allows NULL values
 -- This modification may be needed if the column was created as NOT NULL
 ALTER TABLE Producto ALTER COLUMN idProveedor INT NULL;
+
+-- Add tipoCambio column to Venta table
+ALTER TABLE Venta 
+ADD tipoCambio DECIMAL(10,2);
