@@ -16,9 +16,11 @@ import Venta from './views/Venta';
 import Login from './views/Login';
 import Ingreso from './views/Ingreso';
 import Egreso from './views/Egreso';
+import Sucursal from './views/Sucursal';
 
 import UserProvider from './context/UserProvider';
 import PermissionProvider from './context/PermissionProvider';
+import SucursalProvider from './context/SucursalProvider';
 import ProtectedRoute from './componentes/ProtectedRoute';
 import AccessDenied from './views/AccessDenied';
 import Proveedor from './views/Proveedor';
@@ -28,7 +30,8 @@ const root = ReactDOM.createRoot(document.getElementById('wrapper'));
 root.render(
   <BrowserRouter>
     <UserProvider>
-      <PermissionProvider>
+      <SucursalProvider>
+        <PermissionProvider>
         <Routes>
         {/*ACONTINUACION ESTABLECEMOS LAS RUTAS DE NUESTRO SISTEMA*/}
 
@@ -126,11 +129,20 @@ root.render(
               </ProtectedRoute>
             }
           />
+          <Route
+            path="sucursal"
+            element={
+              <ProtectedRoute requiredPermission="sucursales">
+                <Sucursal />
+              </ProtectedRoute>
+            }
+          />
           <Route path="access-denied" element={<AccessDenied />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
       </PermissionProvider>
+      </SucursalProvider>
     </UserProvider>
   </BrowserRouter>
 );

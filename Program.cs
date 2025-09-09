@@ -3,6 +3,7 @@ using ReactVentas.Models;
 using ReactVentas.Services;
 using ReactVentas.Interfaces;
 using ReactVentas.Repositories;
+using ReactVentas.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<DBREACT_VENTAContext>(options => {
 
 // Registrar servicio de contraseñas
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+
+// Registrar servicio de contexto de sucursal
+builder.Services.AddScoped<ISucursalContextService, SucursalContextService>();
+builder.Services.AddHttpContextAccessor();
 
 // Registrar repositorios
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
@@ -52,6 +57,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();
+
+// Add sucursal context middleware after routing but before controllers
+app.UseSucursalContext();
 
 app.MapControllers();
 

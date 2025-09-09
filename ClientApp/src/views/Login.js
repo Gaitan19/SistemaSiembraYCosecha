@@ -1,5 +1,7 @@
 ﻿import { useContext, useState } from "react"
 import { UserContext } from "../context/UserProvider"
+import { useSucursal } from "../context/SucursalProvider"
+import SucursalSelectionModal from "../componentes/SucursalSelectionModal"
 import Swal from 'sweetalert2'
 import { Navigate } from "react-router-dom"
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
@@ -9,7 +11,10 @@ const Login = () => {
     const [_correo, set_Correo] = useState("")
     const [_clave, set_Clave] = useState("")
     const { user, iniciarSession } = useContext(UserContext)
-    const [visiblePassword, setVisiblePassword] = useState(false);
+    const { seleccionarSucursal, limpiarSucursal } = useSucursal()
+    const [visiblePassword, setVisiblePassword] = useState(false)
+    const [showSucursalModal, setShowSucursalModal] = useState(false)
+    const [pendingUserData, setPendingUserData] = useState(null)
 
    
 
@@ -22,6 +27,27 @@ const Login = () => {
     const handleVisiblePassword = () => {
         setVisiblePassword((preVisible) => !preVisible);
     };
+
+    const handleSucursalSelected = (sucursal) => {
+        // Set the selected sucursal
+        seleccionarSucursal(sucursal)
+        
+        // Close modal and complete login
+        setShowSucursalModal(false)
+        iniciarSession(pendingUserData)
+        
+        // Clear pending data
+        setPendingUserData(null)
+    }
+
+    const handleSucursalModalClose = () => {
+        // If user closes modal without selecting, still proceed with login
+        // but without sucursal context (admin will need to select later)
+        setShowSucursalModal(false)
+        limpiarSucursal() // Clear any previous sucursal selection
+        iniciarSession(pendingUserData)
+        setPendingUserData(null)
+    }
 
 
     const handleSubmit = (event) => {
@@ -50,8 +76,22 @@ const Login = () => {
                     'error'
                 )
             } else {
-                iniciarSession(dataJson)
-                // Permissions will be loaded automatically by App.js
+                // Check if user is admin and needs to select sucursal
+                if (dataJson.esAdministrador) {
+                    // For admin users, show sucursal selection modal
+                    setPendingUserData(dataJson)
+                    setShowSucursalModal(true)
+                } else {
+                    // For employee users, automatically set their assigned sucursal and proceed
+                    if (dataJson.idSucursal && dataJson.nombreSucursal) {
+                        seleccionarSucursal({
+                            idSucursal: dataJson.idSucursal,
+                            departamento: dataJson.nombreSucursal,
+                            direccion: dataJson.nombreSucursal
+                        })
+                    }
+                    iniciarSession(dataJson)
+                }
             }
 
         }).catch((error) => {
@@ -65,14 +105,10 @@ const Login = () => {
 
     return (
         <div className="container">
-
             <div className="row justify-content-center">
-
                 <div className="col-xl-10 col-lg-12 col-md-9">
-
                     <div className="card o-hidden border-0 shadow-lg my-5">
                         <div className="card-body p-0">
-
                             <div className="row Login-container-image">
                                 <div className="col-lg-6 d-none d-lg-block bg-login-image"></div>
                                 <div className="col-lg-6">
@@ -111,11 +147,15 @@ const Login = () => {
                             </div>
                         </div>
                     </div>
-
                 </div>
-
             </div>
-
+            
+            {/* Sucursal Selection Modal */}
+            <SucursalSelectionModal 
+                show={showSucursalModal}
+                onClose={handleSucursalModalClose}
+                onSucursalSelected={handleSucursalSelected}
+            />
         </div>
     )
 }
