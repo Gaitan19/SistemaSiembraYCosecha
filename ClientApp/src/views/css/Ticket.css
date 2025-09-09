@@ -118,7 +118,7 @@
     font-size: 14px;
     font-weight: bold;
     margin: 0!important;
-    text-transform: uppercase;
+    text-transform: none !important;
 }
 
 
