@@ -55,6 +55,11 @@ const NavBar = () => {
               <NavLink to="/usuario" className="collapse-item">
                 Usuarios
               </NavLink>
+              {tienePermiso("sucursales") && (
+                <NavLink to="/sucursal" className="collapse-item">
+                  Sucursales
+                </NavLink>
+              )}
             </div>
           </div>
         </li>

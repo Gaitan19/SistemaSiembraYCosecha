@@ -3,12 +3,14 @@ import { Navigate, Outlet } from 'react-router-dom'
 import NavBar from './componentes/NavBar'
 import { Link } from 'react-router-dom';
 import { UserContext } from './context/UserProvider';
+import { useSucursal } from './context/SucursalProvider';
 import { usePermissions } from './context/PermissionProvider';
 import Swal from 'sweetalert2';
 
 const App = () => {
     const { user, cerrarSession } = useContext(UserContext)
     const { limpiarPermisos, cargarPermisos, userPermissions } = usePermissions()
+    const { obtenerNombreSucursal, limpiarSucursal } = useSucursal()
 
     // Cargar permisos cuando el usuario existe (al inicializar o refrescar página)
     useEffect(() => {
@@ -48,6 +50,7 @@ const App = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 limpiarPermisos() // Limpiar permisos antes de cerrar sesión
+                limpiarSucursal() // Limpiar sucursal antes de cerrar sesión
                 cerrarSession()
             }
         })
@@ -75,6 +78,13 @@ const App = () => {
 
                     {/* Topbar Navbar */}
                     <ul className="navbar-nav ml-auto">
+
+                        {/* Sucursal Indicator */}
+                        <li className="nav-item mx-1">
+                            <span className="badge badge-info p-2">
+                                <i className="fas fa-building"></i> {obtenerNombreSucursal()}
+                            </span>
+                        </li>
 
                         <div className="topbar-divider d-none d-sm-block"></div>
 

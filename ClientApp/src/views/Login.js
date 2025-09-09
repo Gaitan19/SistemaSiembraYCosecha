@@ -1,5 +1,7 @@
 ﻿import { useContext, useState } from "react"
 import { UserContext } from "../context/UserProvider"
+import { useSucursal } from "../context/SucursalProvider"
+import ModalSucursalSelector from "../componentes/ModalSucursalSelector"
 import Swal from 'sweetalert2'
 import { Navigate } from "react-router-dom"
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
@@ -9,7 +11,10 @@ const Login = () => {
     const [_correo, set_Correo] = useState("")
     const [_clave, set_Clave] = useState("")
     const { user, iniciarSession } = useContext(UserContext)
+    const { seleccionarSucursal, limpiarSucursal } = useSucursal()
     const [visiblePassword, setVisiblePassword] = useState(false);
+    const [showSucursalSelector, setShowSucursalSelector] = useState(false);
+    const [pendingUserData, setPendingUserData] = useState(null);
 
    
 
@@ -23,6 +28,13 @@ const Login = () => {
         setVisiblePassword((preVisible) => !preVisible);
     };
 
+
+    const handleSucursalSelected = (sucursal) => {
+        seleccionarSucursal(sucursal);
+        iniciarSession(pendingUserData);
+        setShowSucursalSelector(false);
+        setPendingUserData(null);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -50,8 +62,23 @@ const Login = () => {
                     'error'
                 )
             } else {
-                iniciarSession(dataJson)
-                // Permissions will be loaded automatically by App.js
+                // Check if user is an administrator
+                if (dataJson.esAdministrador) {
+                    // For administrators, show sucursal selector
+                    setPendingUserData(dataJson);
+                    setShowSucursalSelector(true);
+                } else {
+                    // For employees, automatically set their assigned sucursal
+                    if (dataJson.idSucursal) {
+                        const sucursalData = {
+                            idSucursal: dataJson.idSucursal,
+                            departamento: dataJson.sucursalDepartamento,
+                            direccion: dataJson.sucursalDireccion
+                        };
+                        seleccionarSucursal(sucursalData);
+                    }
+                    iniciarSession(dataJson);
+                }
             }
 
         }).catch((error) => {
@@ -116,6 +143,10 @@ const Login = () => {
 
             </div>
 
+            <ModalSucursalSelector 
+                isOpen={showSucursalSelector}
+                onSucursalSelected={handleSucursalSelected}
+            />
         </div>
     )
 }

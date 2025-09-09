@@ -19,17 +19,20 @@ import Egreso from './views/Egreso';
 
 import UserProvider from './context/UserProvider';
 import PermissionProvider from './context/PermissionProvider';
+import SucursalProvider from './context/SucursalProvider';
 import ProtectedRoute from './componentes/ProtectedRoute';
 import AccessDenied from './views/AccessDenied';
 import Proveedor from './views/Proveedor';
+import Sucursal from './views/Sucursal';
 
 const root = ReactDOM.createRoot(document.getElementById('wrapper'));
 
 root.render(
   <BrowserRouter>
     <UserProvider>
-      <PermissionProvider>
-        <Routes>
+      <SucursalProvider>
+        <PermissionProvider>
+          <Routes>
         {/*ACONTINUACION ESTABLECEMOS LAS RUTAS DE NUESTRO SISTEMA*/}
 
         {/*ruta individual sin usar una como base*/}
@@ -126,11 +129,20 @@ root.render(
               </ProtectedRoute>
             }
           />
+          <Route
+            path="sucursal"
+            element={
+              <ProtectedRoute requiredPermission="sucursales">
+                <Sucursal />
+              </ProtectedRoute>
+            }
+          />
           <Route path="access-denied" element={<AccessDenied />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
-      </PermissionProvider>
+        </PermissionProvider>
+      </SucursalProvider>
     </UserProvider>
   </BrowserRouter>
 );
