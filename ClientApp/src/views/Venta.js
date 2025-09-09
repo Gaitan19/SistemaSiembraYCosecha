@@ -178,15 +178,20 @@ const Venta = () => {
   };
 
   const agregarProductoAlCarrito = async (producto) => {
-    const unidadesDisponibles = producto.unidades || 0;
+    const unidadesDisponibles = producto.unidades ?? 0;
+    const tieneUnidadesGestionadas = producto.unidades !== null && producto.unidades !== undefined;
 
     Swal.fire({
       title: producto.nombre || producto.descripcion,
-      text: `Ingrese la cantidad (Stock disponible: ${unidadesDisponibles} unidades)`,
+      text: tieneUnidadesGestionadas 
+        ? `Ingrese la cantidad (Stock disponible: ${unidadesDisponibles} unidades)`
+        : `Ingrese la cantidad (Este producto no gestiona stock)`,
       input: "text",
       inputAttributes: {
         autocapitalize: "off",
-        placeholder: `Máximo ${unidadesDisponibles} unidades`,
+        placeholder: tieneUnidadesGestionadas 
+          ? `Máximo ${unidadesDisponibles} unidades`
+          : "Cantidad deseada",
       },
       showCancelButton: true,
       confirmButtonText: "Aceptar",
@@ -200,15 +205,17 @@ const Venta = () => {
         } else if (parseInt(inputValue) < 1) {
           Swal.showValidationMessage(`La cantidad debe ser mayor a "0"`);
         } else {
-          // Validar que la cantidad no supere las unidades disponibles
-          const cantidadSolicitada = parseInt(inputValue);
-          const unidadesDisponibles = producto.unidades || 0;
+          // Solo validar stock si el producto gestiona unidades
+          if (tieneUnidadesGestionadas) {
+            const cantidadSolicitada = parseInt(inputValue);
+            const unidadesDisponibles = producto.unidades || 0;
 
-          if (cantidadSolicitada > unidadesDisponibles) {
-            Swal.showValidationMessage(
-              `La cantidad solicitada (${cantidadSolicitada}) supera el stock disponible (${unidadesDisponibles} unidades)`
-            );
-            return;
+            if (cantidadSolicitada > unidadesDisponibles) {
+              Swal.showValidationMessage(
+                `La cantidad solicitada (${cantidadSolicitada}) supera el stock disponible (${unidadesDisponibles} unidades)`
+              );
+              return;
+            }
           }
 
           const tempStock = tempProducts.filter(
@@ -267,7 +274,7 @@ const Venta = () => {
       name: "Unidades",
       selector: (row) => row.unidades,
       sortable: true,
-      cell: (row) => row.unidades,
+      cell: (row) => row.unidades ?? "Sin gestión",
       width: "100px",
     },
     {
