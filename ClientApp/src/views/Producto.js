@@ -29,7 +29,7 @@ const modeloProducto = {
   idCategoria: 0,
   idProveedor: 0,
   precio: 0,
-  unidades: 0,
+  unidades: null,
   esActivo: true,
 };
 
@@ -56,7 +56,12 @@ const Producto = () => {
     } else if (e.target.name === "esActivo") {
       value = e.target.value === "true" ? true : false;
     } else if (e.target.name === "unidades") {
-      value = parseInt(e.target.value) || 0;
+      if (e.target.value === "" || e.target.value === null || e.target.value === undefined) {
+        value = null;
+      } else {
+        const parsedValue = parseInt(e.target.value);
+        value = isNaN(parsedValue) ? null : parsedValue;
+      }
     } else {
       value = e.target.value;
     }
@@ -199,6 +204,28 @@ const Producto = () => {
     setFilteredProductos(filtered);
   }, [searchTerm, statusFilter, productos]);
 
+  // Check for low stock products and show alerts
+  useEffect(() => {
+    if (productos.length > 0) {
+      const productosPocoStock = productos.filter(producto => 
+        producto.unidades !== null && 
+        producto.unidades !== undefined && 
+        producto.unidades < 10 && 
+        producto.esActivo
+      );
+      
+      if (productosPocoStock.length > 0) {
+        const nombreProductos = productosPocoStock.map(p => p.nombre).join(', ');
+        Swal.fire({
+          title: 'Alerta de Stock Bajo',
+          text: `Los siguientes productos tienen menos de 10 unidades: ${nombreProductos}`,
+          icon: 'warning',
+          confirmButtonText: 'Entendido'
+        });
+      }
+    }
+  }, [productos]);
+
   const columns = [
     {
       name: "Nombre",
@@ -226,7 +253,7 @@ const Producto = () => {
       name: "Unidades",
       selector: (row) => row.unidades,
       sortable: true,
-      cell: (row) => row.unidades || 0,
+      cell: (row) => row.unidades ?? "Sin unidades",
     },
     {
       name: "Estado",
@@ -270,6 +297,7 @@ const Producto = () => {
             className="mr-2"
             onClick={() => abrirModalAgregarUnidades(row)}
             title="Agregar Unidades"
+            disabled={row.unidades === null || row.unidades === undefined}
           >
             <i className="fas fa-plus-circle mr-2"></i>
           </Button>
@@ -299,6 +327,17 @@ const Producto = () => {
       },
     },
   };
+
+  const conditionalRowStyles = [
+    {
+      when: row => row.unidades !== null && row.unidades !== undefined && row.unidades < 10 && row.esActivo,
+      style: {
+        backgroundColor: '#ffebee',
+        color: '#d32f2f',
+        borderBottom: '1px solid #f44336',
+      },
+    },
+  ];
 
   const paginationComponentOptions = {
     rowsPerPageText: "Filas por página",
@@ -547,6 +586,7 @@ const Producto = () => {
                 columns={columns}
                 data={filteredProductos}
                 customStyles={customStyles}
+                conditionalRowStyles={conditionalRowStyles}
                 pagination
                 paginationComponentOptions={paginationComponentOptions}
                 fixedHeader
@@ -666,7 +706,7 @@ const Producto = () => {
               </Col>
               <Col sm={6}>
                 <FormGroup>
-                  <Label>Unidades</Label>
+                  <Label>Unidades (Opcional)</Label>
                   <Input
                     bsSize="sm"
                     name="unidades"
@@ -674,8 +714,9 @@ const Producto = () => {
                     min={0}
                     step="1"
                     onChange={handleChange}
-                    value={producto.unidades}
+                    value={producto.unidades ?? ""}
                     readOnly={modoSoloLectura}
+                    placeholder="Dejar vacío si no se gestionan unidades"
                   />
                 </FormGroup>
               </Col>
@@ -719,7 +760,7 @@ const Producto = () => {
         </ModalHeader>
         <ModalBody>
           <FormGroup>
-            <Label>Unidades actuales: {productoParaUnidades?.unidades || 0}</Label>
+            <Label>Unidades actuales: {productoParaUnidades?.unidades ?? "Sin unidades registradas"}</Label>
           </FormGroup>
           <FormGroup>
             <Label>Ingrese las unidades a agregar:</Label>

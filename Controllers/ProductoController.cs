@@ -45,6 +45,10 @@ namespace ReactVentas.Controllers
                     request.IdProveedor = null;
                 if (request.IdCategoria == 0)
                     request.IdCategoria = null;
+                
+                // Ensure Unidades is either null or a positive integer
+                if (request.Unidades.HasValue && request.Unidades.Value < 0)
+                    request.Unidades = null;
 
                var newProduct = await _productoRepository.AddAsync(request);
                 await _productoRepository.SaveChangesAsync();
@@ -71,6 +75,10 @@ namespace ReactVentas.Controllers
                     request.IdProveedor = null;
                 if (request.IdCategoria == 0)
                     request.IdCategoria = null;
+                
+                // Ensure Unidades is either null or a positive integer
+                if (request.Unidades.HasValue && request.Unidades.Value < 0)
+                    request.Unidades = null;
 
                 await _productoRepository.UpdateAsync(request);
                 await _productoRepository.SaveChangesAsync();

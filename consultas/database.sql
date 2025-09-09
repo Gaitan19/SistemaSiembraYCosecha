@@ -48,9 +48,7 @@ create table Proveedor (
 go 
 create table Producto (
 idProducto int primary key identity(1,1),
-codigo varchar(100) unique,
 nombre varchar(100),
-marca varchar(100),
 descripcion varchar(200),
 idCategoria int references Categoria(idCategoria),
 idProveedor int references Proveedor(idProveedor),
