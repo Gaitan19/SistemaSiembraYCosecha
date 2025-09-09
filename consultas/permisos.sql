@@ -37,7 +37,8 @@ insert into Modulo(nombre, descripcion, esActivo) values
 ('ingresos', 'Gestión de Ingresos', 1),
 ('egresos', 'Gestión de Egresos', 1),
 ('reportes', 'Reportes y Análisis', 1),
-('cierre', 'Cierre Contable', 1)
+('cierre', 'Cierre Contable', 1),
+('sucursales', 'Gestión de Sucursales', 1)
 go
 
 -- Obtener todos los usuarios de tipo Empleado y crear permisos por defecto

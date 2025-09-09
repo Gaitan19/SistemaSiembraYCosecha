@@ -6,6 +6,7 @@ create procedure sp_RegistrarVenta(
 @documentoCliente varchar(40),
 @nombreCliente varchar(40),
 @idUsuario int,
+@idSucursal int,
 @total decimal(10,2),
 @productos xml,
 @tipoPago varchar(50),
@@ -42,11 +43,12 @@ begin
 
 			update NumeroDocumento set
 			@nro = id= id+1
+			where idSucursal = @idSucursal
 			
 			set @nrodocgenerado =  RIGHT('000000' + convert(varchar(max),@nro),6)
 
-			insert into Venta(numeroDocumento,idUsuario,documentoCliente,nombreCliente,total,tipoPago,tipoDinero,numeroRuc,montoPago,vuelto,tipoCambio) 
-			values (@nrodocgenerado,@idUsuario,@documentoCliente,@nombreCliente,@total,@tipoPago,@tipoDinero,@numeroRuc,@montoPago,@vuelto,@tipoCambio)
+			insert into Venta(numeroDocumento,idUsuario,idSucursal,documentoCliente,nombreCliente,total,tipoPago,tipoDinero,numeroRuc,montoPago,vuelto,tipoCambio) 
+			values (@nrodocgenerado,@idUsuario,@idSucursal,@documentoCliente,@nombreCliente,@total,@tipoPago,@tipoDinero,@numeroRuc,@montoPago,@vuelto,@tipoCambio)
 
 
 			set @idventa = SCOPE_IDENTITY()
@@ -55,14 +57,14 @@ begin
 			select @idventa,IdProducto,Cantidad,Precio,Total from @tbproductos
 
 			-- Registrar ingreso con el monto que paga el cliente
-			insert into Ingreso(descripcion,monto,tipoPago,tipoDinero,idUsuario,esActivo)
-			values ('Pago de venta #' + @nrodocgenerado,@montoPago,@tipoPago,@tipoDinero,@idUsuario,1)
+			insert into Ingreso(descripcion,monto,tipoPago,tipoDinero,idUsuario,idSucursal,esActivo)
+			values ('Pago de venta #' + @nrodocgenerado,@montoPago,@tipoPago,@tipoDinero,@idUsuario,@idSucursal,1)
 
 			-- Registrar egreso con el vuelto (solo si hay vuelto y no es transferencia)
 			if @vuelto > 0 and @tipoPago != 'Transferencia'
 			begin
-				insert into Egreso(descripcion,monto,tipoPago,tipoDinero,idUsuario,esActivo)
-				values ('Vuelto de venta #' + @nrodocgenerado,@vuelto,'Efectivo','Cordobas',@idUsuario,1)
+				insert into Egreso(descripcion,monto,tipoPago,tipoDinero,idUsuario,idSucursal,esActivo)
+				values ('Vuelto de venta #' + @nrodocgenerado,@vuelto,'Efectivo','Cordobas',@idUsuario,@idSucursal,1)
 			end
 
 		COMMIT

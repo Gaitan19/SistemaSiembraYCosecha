@@ -29,6 +29,12 @@ namespace ReactVentas.Models
         public string? Descripcion { get; set; }
 
         /// <summary>
+        /// Gets or sets the branch identifier for the category.
+        /// Optional field.
+        /// </summary>
+        public int? IdSucursal { get; set; }
+
+        /// <summary>
         /// Gets or sets the active status of the category.
         /// Optional field. A value of true indicates the category is active.
         /// </summary>
@@ -39,6 +45,11 @@ namespace ReactVentas.Models
         /// Optional field.
         /// </summary>
         public DateTime? FechaRegistro { get; set; }
+
+        /// <summary>
+        /// Navigation property to the branch associated with the category.
+        /// </summary>
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
 
         /// <summary>
         /// Navigation property that represents the collection of products related to this category.

@@ -47,6 +47,12 @@ namespace ReactVentas.Models
         public int? IdProveedor { get; set; }
 
         /// <summary>
+        /// Gets or sets the branch identifier for the product.
+        /// Optional field.
+        /// </summary>
+        public int? IdSucursal { get; set; }
+
+        /// <summary>
         /// Gets or sets the price of the product.
         /// Optional field.
         /// </summary>
@@ -73,6 +79,11 @@ namespace ReactVentas.Models
         /// Navigation property to the related supplier entity.  
         /// </summary>  
         public virtual Proveedor? IdProveedorNavigation { get; set; }
+
+        /// <summary>
+        /// Navigation property to the branch associated with the product.
+        /// </summary>
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
 
         /// <summary>
         /// Navigation property to the collection of sale details associated with the product.

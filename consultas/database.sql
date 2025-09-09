@@ -16,12 +16,23 @@ fechaRegistro datetime default getdate()
 
 go
 
+create table Sucursal(
+idSucursal int primary key identity(1,1),
+departamento varchar(100),
+direccion varchar(200),
+esActivo bit,
+fechaRegistro datetime default getdate()
+)
+
+go
+
 create table Usuario(
 idUsuario int primary key identity(1,1),
 nombre varchar(80),
 correo varchar(80) unique,
 telefono varchar(40),
 idRol int references Rol(idRol),
+idSucursal int references Sucursal(idSucursal),
 clave varchar(200),
 esActivo bit
 )
@@ -31,6 +42,7 @@ go
 create table Categoria(
 idCategoria int primary key identity(1,1),
 descripcion varchar(80),
+idSucursal int references Sucursal(idSucursal),
 esActivo bit,
 fechaRegistro datetime default getdate()
 )
@@ -40,6 +52,7 @@ create table Proveedor (
     nombre varchar(100),
     correo varchar(100),
     telefono varchar(40),
+    idSucursal int references Sucursal(idSucursal),
 	esActivo bit,
     fechaRegistro datetime default getdate()
 )
@@ -54,6 +67,7 @@ marca varchar(100),
 descripcion varchar(200),
 idCategoria int references Categoria(idCategoria),
 idProveedor int references Proveedor(idProveedor),
+idSucursal int references Sucursal(idSucursal),
 stock int,
 precio decimal(10,2),
 esActivo bit,
@@ -68,6 +82,7 @@ numeroDocumento varchar(40),
 tipoDocumento varchar(50),
 fechaRegistro datetime default getdate(),
 idUsuario int references Usuario(idUsuario),
+idSucursal int references Sucursal(idSucursal),
 documentoCliente varchar(40),
 nombreCliente varchar(100),
 subTotal decimal(10,2),
@@ -96,6 +111,7 @@ go
 
 create table NumeroDocumento(
 id int primary key,
+idSucursal int references Sucursal(idSucursal),
 fechaRegistro datetime default getdate()
 )
 go
@@ -108,6 +124,7 @@ monto decimal(10,2),
 tipoPago varchar(50),
 tipoDinero varchar(50),
 idUsuario int references Usuario(idUsuario),
+idSucursal int references Sucursal(idSucursal),
 esActivo bit
 )
 
@@ -121,6 +138,7 @@ monto decimal(10,2),
 tipoPago varchar(50),
 tipoDinero varchar(50),
 idUsuario int references Usuario(idUsuario),
+idSucursal int references Sucursal(idSucursal),
 esActivo bit
 )
 

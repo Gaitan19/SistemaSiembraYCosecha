@@ -38,6 +38,12 @@ namespace ReactVentas.Models
         /// </summary>
         public string? Telefono { get; set; }
 
+        /// <summary>
+        /// Gets or sets the branch identifier for the supplier.
+        /// Optional field.
+        /// </summary>
+        public int? IdSucursal { get; set; }
+
         public bool? EsActivo { get; set; }
 
         /// <summary>
@@ -49,5 +55,10 @@ namespace ReactVentas.Models
         /// Navigation property to the collection of products supplied by this provider.  
         /// </summary>  
         public virtual ICollection<Producto> Productos { get; set; }
+
+        /// <summary>
+        /// Navigation property to the branch associated with the supplier.
+        /// </summary>
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
     }
 }
