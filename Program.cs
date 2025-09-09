@@ -27,6 +27,7 @@ builder.Services.AddScoped<IIngresoRepository, IngresoRepository>();
 builder.Services.AddScoped<IEgresoRepository, EgresoRepository>();
 builder.Services.AddScoped<IModuloRepository, ModuloRepository>();
 builder.Services.AddScoped<IUsuarioPermisoRepository, UsuarioPermisoRepository>();
+builder.Services.AddScoped<ISucursalRepository, SucursalRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(option =>
 {

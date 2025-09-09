@@ -45,6 +45,12 @@ namespace ReactVentas.Controllers
         {
             try
             {
+                // Validate that Empleado users have a sucursal assigned
+                if (request.IdRol == 2 && !request.IdSucursal.HasValue)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Los usuarios empleados deben tener una sucursal asignada");
+                }
+
                 // Hashear la contraseña antes de guardar
                 request.Clave = _passwordService.HashPassword(request.Clave);
 
@@ -61,7 +67,6 @@ namespace ReactVentas.Controllers
                 // Notify all clients about the new user (without password)
                
                 var usuarioConRelaciones = await _usuarioRepository.GetUserWithRelatedDataByIdAsync(newUser.IdUsuario);
-
 
                 // Return a 200 OK status indicating success.
                 return StatusCode(StatusCodes.Status200OK, "ok");
@@ -83,11 +88,19 @@ namespace ReactVentas.Controllers
                 if (usuario == null)
                     return StatusCode(StatusCodes.Status404NotFound, "Usuario no encontrado");
 
+                // Validate sucursal assignment for Empleado users
+                var nuevoRol = request.IdRol ?? usuario.IdRol;
+                if (nuevoRol == 2 && !request.IdSucursal.HasValue && !usuario.IdSucursal.HasValue)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Los usuarios empleados deben tener una sucursal asignada");
+                }
+
                 // Actualizar campos básicos
                 usuario.Nombre = request.Nombre ?? usuario.Nombre;
                 usuario.Correo = request.Correo ?? usuario.Correo;
                 usuario.Telefono = request.Telefono ?? usuario.Telefono;
                 usuario.IdRol = request.IdRol ?? usuario.IdRol;
+                usuario.IdSucursal = request.IdSucursal ?? usuario.IdSucursal;
                 usuario.EsActivo = request.EsActivo ?? usuario.EsActivo;
 
                 // Cambio de contraseña (solo si se proporcionan ambos campos)
@@ -104,7 +117,7 @@ namespace ReactVentas.Controllers
                 await _usuarioRepository.SaveChangesAsync();
 
                 // Notify all clients about the updated user (without password)
-                var userWithoutPassword = new { usuario.IdUsuario, usuario.Nombre, usuario.Correo, usuario.IdRol, usuario.EsActivo };
+                var userWithoutPassword = new { usuario.IdUsuario, usuario.Nombre, usuario.Correo, usuario.IdRol, usuario.IdSucursal, usuario.EsActivo };
 
                 return StatusCode(StatusCodes.Status200OK, "ok");
             }
@@ -139,6 +152,52 @@ namespace ReactVentas.Controllers
             {
                 // Return a 500 Internal Server Error status if an exception occurs.
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch]
+        [Route("AsignarSucursal")]
+        public async Task<IActionResult> AsignarSucursal([FromBody] DtoAsignarSucursal request)
+        {
+            // Assign or remove sucursal from a user (Admin only operation)
+            try
+            {
+                var usuario = await _usuarioRepository.GetByIdAsync(request.IdUsuario);
+                if (usuario == null)
+                    return StatusCode(StatusCodes.Status404NotFound, "Usuario no encontrado");
+
+                // Validate that Empleado users must have a sucursal
+                if (usuario.IdRol == 2 && !request.IdSucursal.HasValue)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Los usuarios empleados deben tener una sucursal asignada");
+                }
+
+                usuario.IdSucursal = request.IdSucursal;
+
+                await _usuarioRepository.UpdateAsync(usuario);
+                await _usuarioRepository.SaveChangesAsync();
+
+                return StatusCode(StatusCodes.Status200OK, "ok");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("PorSucursal/{idSucursal:int}")]
+        public async Task<IActionResult> GetUsuariosPorSucursal(int idSucursal)
+        {
+            // Get users by branch
+            try
+            {
+                var usuarios = await _usuarioRepository.GetWhereAsync(u => u.IdSucursal == idSucursal && u.EsActivo == true);
+                return StatusCode(StatusCodes.Status200OK, usuarios);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new List<Usuario>());
             }
         }
     }

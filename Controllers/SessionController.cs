@@ -24,23 +24,36 @@ namespace ReactVentas.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] Dtosesion request)
         {
-            Usuario usuario = new Usuario();
             try
             {
-                usuario = await _usuarioRepository.GetByEmailAsync(request.correo);
+                var usuario = await _usuarioRepository.GetByEmailAsync(request.correo);
 
                 if (usuario == null ||
                     !_passwordService.VerifyPassword(request.clave, usuario.Clave))
                 {
-                    usuario = new Usuario();
-                    return StatusCode(StatusCodes.Status401Unauthorized, usuario);
+                    return StatusCode(StatusCodes.Status401Unauthorized, new DtoUsuarioSesion());
                 }
 
-                return StatusCode(StatusCodes.Status200OK, usuario);
+                // Create session DTO with necessary information
+                var usuarioSesion = new DtoUsuarioSesion
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    Nombre = usuario.Nombre,
+                    Correo = usuario.Correo,
+                    Telefono = usuario.Telefono,
+                    IdRol = usuario.IdRol,
+                    DescripcionRol = usuario.IdRolNavigation?.Descripcion,
+                    IdSucursal = usuario.IdSucursal,
+                    NombreSucursal = usuario.IdSucursalNavigation?.Departamento,
+                    EsActivo = usuario.EsActivo,
+                    EsAdministrador = usuario.IdRolNavigation?.Descripcion?.ToLower() == "administrador"
+                };
+
+                return StatusCode(StatusCodes.Status200OK, usuarioSesion);
             }
             catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, usuario);
+                return StatusCode(StatusCodes.Status500InternalServerError, new DtoUsuarioSesion());
             }
         }
     }

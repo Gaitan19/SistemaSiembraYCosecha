@@ -20,6 +20,7 @@ namespace ReactVentas.Repositories
         {
             return await _dbSet
                 .Include(u => u.IdRolNavigation)
+                .Include(u => u.IdSucursalNavigation)
                 .OrderByDescending(u => u.IdUsuario)
                 .ToListAsync();
         }
@@ -31,6 +32,7 @@ namespace ReactVentas.Repositories
         {
             return await _dbSet
                 .Include(u => u.IdRolNavigation)
+                .Include(u => u.IdSucursalNavigation)
                 .Where(u => u.EsActivo == true)
                 .OrderByDescending(u => u.IdUsuario)
                 .ToListAsync();
@@ -43,6 +45,7 @@ namespace ReactVentas.Repositories
         {
             return await _dbSet
                 .Include(u => u.IdRolNavigation)
+                .Include(u => u.IdSucursalNavigation)
                 .FirstOrDefaultAsync(u => u.Correo == email && u.EsActivo == true);
         }
 
@@ -53,6 +56,7 @@ namespace ReactVentas.Repositories
         {
             return await _dbSet
                 .Include(u => u.IdRolNavigation)
+                .Include(u => u.IdSucursalNavigation)
                 .Where(u => u.IdRol == rolId && u.EsActivo == true)
                 .OrderByDescending(u => u.IdUsuario)
                 .ToListAsync();
@@ -72,6 +76,7 @@ namespace ReactVentas.Repositories
         {
             return await _dbSet
                 .Include(p => p.IdRolNavigation)
+                .Include(p => p.IdSucursalNavigation)
                 .FirstOrDefaultAsync(p => p.IdUsuario == id);
         }
     }
