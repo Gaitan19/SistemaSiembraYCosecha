@@ -12,8 +12,10 @@ namespace ReactVentas.Models
         public string? TipoPago { get; set; }
         public string? TipoDinero { get; set; }
         public int? IdUsuario { get; set; }
+        public int? IdSucursal { get; set; }
         public bool? EsActivo { get; set; }
 
         public virtual Usuario? IdUsuarioNavigation { get; set; }
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
     }
 }

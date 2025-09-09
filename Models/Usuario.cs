@@ -50,6 +50,12 @@ namespace ReactVentas.Models
         public int? IdRol { get; set; }
 
         /// <summary>
+        /// Gets or sets the branch identifier for the user.
+        /// Optional field.
+        /// </summary>
+        public int? IdSucursal { get; set; }
+
+        /// <summary>
         /// Gets or sets the password for the user.
         /// Optional field.
         /// </summary>
@@ -65,6 +71,11 @@ namespace ReactVentas.Models
         /// Navigation property to the role associated with the user.
         /// </summary>
         public virtual Rol? IdRolNavigation { get; set; }
+
+        /// <summary>
+        /// Navigation property to the branch associated with the user.
+        /// </summary>
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
 
         /// <summary>
         /// Navigation property to the collection of sales associated with the user.

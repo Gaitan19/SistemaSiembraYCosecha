@@ -25,6 +25,7 @@ namespace ReactVentas.Models
         public virtual DbSet<Producto> Productos { get; set; } = null!;
         public virtual DbSet<Proveedor> Proveedores { get; set; } = null!;
         public virtual DbSet<Rol> Rols { get; set; } = null!;
+        public virtual DbSet<Sucursal> Sucursales { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
         public virtual DbSet<UsuarioPermiso> UsuarioPermiso { get; set; } = null!;
         public virtual DbSet<Venta> Venta { get; set; } = null!;
@@ -130,6 +131,7 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
                 entity.Property(e => e.IdProveedor).HasColumnName("idProveedor");  
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");  
 
 
                 entity.Property(e => e.Precio)
@@ -147,6 +149,12 @@ namespace ReactVentas.Models
                     .HasForeignKey(d => d.IdProveedor)  
                     .IsRequired(false)
                     .HasConstraintName("FK__Producto__idProv__45F365D3");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Productos)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Producto__idSucursal__47DBAE45");
             });
 
             modelBuilder.Entity<Proveedor>(entity =>
@@ -201,6 +209,33 @@ namespace ReactVentas.Models
                     .HasDefaultValueSql("(getdate())");
             });
 
+            modelBuilder.Entity<Sucursal>(entity =>
+            {
+                entity.HasKey(e => e.IdSucursal)
+                    .HasName("PK__Sucursal__4C2F8B1A6E5D0C22");
+
+                entity.ToTable("Sucursal");
+
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
+                entity.Property(e => e.Departamento)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("departamento");
+
+                entity.Property(e => e.Direccion)
+                    .HasMaxLength(200)
+                    .IsUnicode(false)
+                    .HasColumnName("direccion");
+
+                entity.Property(e => e.EsActivo).HasColumnName("esActivo");
+
+                entity.Property(e => e.FechaRegistro)
+                    .HasColumnType("datetime")
+                    .HasColumnName("fechaRegistro")
+                    .HasDefaultValueSql("(getdate())");
+            });
+
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.IdUsuario)
@@ -224,6 +259,8 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdRol).HasColumnName("idRol");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(40)
                     .IsUnicode(false)
@@ -238,6 +275,12 @@ namespace ReactVentas.Models
                     .WithMany(p => p.Usuarios)
                     .HasForeignKey(d => d.IdRol)
                     .HasConstraintName("FK__Usuario__idRol__3A81B327");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Usuarios)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Usuario__idSucursal__3B75D760");
             });
 
             modelBuilder.Entity<Ingreso>(entity =>
@@ -270,6 +313,8 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.EsActivo)
                     .HasColumnName("esActivo")
                     .HasDefaultValue(true);
@@ -278,6 +323,12 @@ namespace ReactVentas.Models
                     .WithMany(p => p.Ingresos)
                     .HasForeignKey(d => d.IdUsuario)
                     .HasConstraintName("FK__Ingreso__idUsuario__71D1E811");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Ingresos)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Ingreso__idSucursal__72C60C4A");
             });
 
             modelBuilder.Entity<Egreso>(entity =>
@@ -310,6 +361,8 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.EsActivo)
                     .HasColumnName("esActivo")
                     .HasDefaultValue(true);
@@ -318,6 +371,12 @@ namespace ReactVentas.Models
                     .WithMany(p => p.Egresos)
                     .HasForeignKey(d => d.IdUsuario)
                     .HasConstraintName("FK__Egreso__idUsuario__74AE54BC");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Egresos)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Egreso__idSucursal__75A278F5");
             });
 
             modelBuilder.Entity<Venta>(entity =>
@@ -339,6 +398,8 @@ namespace ReactVentas.Models
 
                 entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.NombreCliente)
                     .HasMaxLength(40)
                     .IsUnicode(false)
@@ -357,6 +418,12 @@ namespace ReactVentas.Models
                     .WithMany(p => p.Venta)
                     .HasForeignKey(d => d.IdUsuario)
                     .HasConstraintName("FK__Venta__idUsuario__5CD6CB2B");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Ventas)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Venta__idSucursal__5DCAEF64");
             });
 
             modelBuilder.Entity<Modulo>(entity =>

@@ -41,6 +41,12 @@ namespace ReactVentas.Models
         public int? IdUsuario { get; set; }
 
         /// <summary>
+        /// Gets or sets the identifier of the branch where the sale was registered.
+        /// Optional field.
+        /// </summary>
+        public int? IdSucursal { get; set; }
+
+        /// <summary>
         /// Gets or sets the client's document number (e.g., tax ID).
         /// Optional field.
         /// </summary>
@@ -98,6 +104,11 @@ namespace ReactVentas.Models
         /// Navigation property to the user associated with this sale.
         /// </summary>
         public virtual Usuario? IdUsuarioNavigation { get; set; }
+
+        /// <summary>
+        /// Navigation property to the branch associated with this sale.
+        /// </summary>
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
 
         /// <summary>
         /// Navigation property to the collection of sale details associated with this sale.
