@@ -24,23 +24,37 @@ namespace ReactVentas.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] Dtosesion request)
         {
-            Usuario usuario = new Usuario();
             try
             {
-                usuario = await _usuarioRepository.GetByEmailAsync(request.correo);
+                var usuario = await _usuarioRepository.GetByEmailAsync(request.correo);
 
                 if (usuario == null ||
                     !_passwordService.VerifyPassword(request.clave, usuario.Clave))
                 {
-                    usuario = new Usuario();
-                    return StatusCode(StatusCodes.Status401Unauthorized, usuario);
+                    return StatusCode(StatusCodes.Status401Unauthorized, new { message = "Invalid credentials" });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, usuario);
+                // Create session response with sucursal and role information
+                var sessionResponse = new DtoSesionResponse
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    Nombre = usuario.Nombre,
+                    Correo = usuario.Correo,
+                    Telefono = usuario.Telefono,
+                    IdRol = usuario.IdRol,
+                    RolDescripcion = usuario.IdRolNavigation?.Descripcion,
+                    IdSucursal = usuario.IdSucursal,
+                    SucursalDepartamento = usuario.IdSucursalNavigation?.Departamento,
+                    SucursalDireccion = usuario.IdSucursalNavigation?.Direccion,
+                    EsActivo = usuario.EsActivo,
+                    EsAdministrador = usuario.IdRolNavigation?.Descripcion?.ToLower() == "administrador"
+                };
+
+                return StatusCode(StatusCodes.Status200OK, sessionResponse);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, usuario);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Internal server error", error = ex.Message });
             }
         }
     }
