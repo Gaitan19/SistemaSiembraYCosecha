@@ -91,4 +91,32 @@ BEGIN
 END
 GO
 
+-- Step 7: Add idSucursal column to Proveedor table (nullable for compatibility)
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Proveedor') AND name = 'idSucursal')
+BEGIN
+    ALTER TABLE Proveedor ADD idSucursal int NULL
+    
+    -- Add foreign key constraint
+    ALTER TABLE Proveedor ADD CONSTRAINT FK_Proveedor_Sucursal 
+    FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal)
+    
+    -- Update existing providers to default sucursal
+    UPDATE Proveedor SET idSucursal = 1 WHERE idSucursal IS NULL
+END
+GO
+
+-- Step 8: Add idSucursal column to Categoria table (nullable for compatibility)
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Categoria') AND name = 'idSucursal')
+BEGIN
+    ALTER TABLE Categoria ADD idSucursal int NULL
+    
+    -- Add foreign key constraint
+    ALTER TABLE Categoria ADD CONSTRAINT FK_Categoria_Sucursal 
+    FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal)
+    
+    -- Update existing categories to default sucursal
+    UPDATE Categoria SET idSucursal = 1 WHERE idSucursal IS NULL
+END
+GO
+
 PRINT 'Migration completed successfully - Sucursal functionality added'

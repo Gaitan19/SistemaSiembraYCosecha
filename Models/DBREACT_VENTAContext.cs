@@ -49,12 +49,20 @@ namespace ReactVentas.Models
                     .IsUnicode(false)
                     .HasColumnName("descripcion");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.EsActivo).HasColumnName("esActivo");
 
                 entity.Property(e => e.FechaRegistro)
                     .HasColumnType("datetime")
                     .HasColumnName("fechaRegistro")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Categorias)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Categoria__idSucursal__48CFD27E");
             });
 
             modelBuilder.Entity<DetalleVenta>(entity =>
@@ -179,12 +187,20 @@ namespace ReactVentas.Models
                     .IsUnicode(false)
                     .HasColumnName("telefono");
 
+                entity.Property(e => e.IdSucursal).HasColumnName("idSucursal");
+
                 entity.Property(e => e.EsActivo).HasColumnName("esActivo");
 
                 entity.Property(e => e.FechaRegistro)
                     .HasColumnType("datetime")
                     .HasColumnName("fechaRegistro")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.IdSucursalNavigation)
+                    .WithMany(p => p.Proveedores)
+                    .HasForeignKey(d => d.IdSucursal)
+                    .IsRequired(false)
+                    .HasConstraintName("FK__Proveedor__idSucursal__49C3F6B7");
             });
 
             modelBuilder.Entity<Rol>(entity =>

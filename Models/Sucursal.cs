@@ -19,6 +19,8 @@ namespace ReactVentas.Models
             Ventas = new HashSet<Venta>();
             Ingresos = new HashSet<Ingreso>();
             Egresos = new HashSet<Egreso>();
+            Proveedores = new HashSet<Proveedor>();
+            Categorias = new HashSet<Categoria>();
         }
 
         /// <summary>
@@ -73,5 +75,15 @@ namespace ReactVentas.Models
         /// Navigation property to the collection of expense records associated with the branch.
         /// </summary>
         public virtual ICollection<Egreso> Egresos { get; set; }
+
+        /// <summary>
+        /// Navigation property to the collection of suppliers associated with the branch.
+        /// </summary>
+        public virtual ICollection<Proveedor> Proveedores { get; set; }
+
+        /// <summary>
+        /// Navigation property to the collection of categories associated with the branch.
+        /// </summary>
+        public virtual ICollection<Categoria> Categorias { get; set; }
     }
 }

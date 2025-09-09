@@ -20,6 +20,7 @@ namespace ReactVentas.Repositories
         {
             return await _dbSet
                 .Include(p => p.Productos.Where(prod => prod.EsActivo == true))
+                .Include(p => p.IdSucursalNavigation)
                 .Where(p => p.EsActivo == true)
                 .OrderByDescending(p => p.IdProveedor)
                 .ToListAsync();
@@ -40,6 +41,7 @@ namespace ReactVentas.Repositories
         public override async Task<List<Proveedor>> GetAllAsync()
         {
             return await _dbSet
+                .Include(p => p.IdSucursalNavigation)
                 .OrderByDescending(p => p.IdProveedor)
                 .ToListAsync();
         }
@@ -50,6 +52,7 @@ namespace ReactVentas.Repositories
         public override async Task<List<Proveedor>> GetActiveAsync()
         {
             return await _dbSet
+                .Include(p => p.IdSucursalNavigation)
                 .Where(p => p.EsActivo == true)
                 .OrderByDescending(p => p.IdProveedor)
                 .ToListAsync();

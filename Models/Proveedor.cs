@@ -41,9 +41,20 @@ namespace ReactVentas.Models
         public bool? EsActivo { get; set; }
 
         /// <summary>
+        /// Gets or sets the identifier for the branch where the supplier is registered.
+        /// Optional field.
+        /// </summary>
+        public int? IdSucursal { get; set; }
+
+        /// <summary>
         /// Gets or sets the date and time when the supplier was registered.
         /// </summary>
         public DateTime FechaRegistro { get; set; }
+
+        /// <summary>
+        /// Navigation property to the related branch entity.
+        /// </summary>
+        public virtual Sucursal? IdSucursalNavigation { get; set; }
 
         /// <summary>  
         /// Navigation property to the collection of products supplied by this provider.  
