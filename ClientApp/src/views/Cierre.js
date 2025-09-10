@@ -700,8 +700,8 @@ const Cierre = () => {
                                 </Row>
                             )}
 
-                            {/* Tables Section */}
-                            {cierreData && (
+                            {/* Tables Section - Only show in segmentation mode */}
+                            {cierreData && reportMode === "Segmentación por método y moneda" && (
                                 <>
                                     <hr />
                                     <Row>
