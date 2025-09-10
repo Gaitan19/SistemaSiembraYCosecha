@@ -475,7 +475,7 @@ const Cierre = () => {
         let columns, pdfData, analytics;
 
         if (consolidatedData) {
-            // Export consolidated data with detailed transactions
+            // Columnas para consolidado
             columns = [
                 { header: 'Categoría', accessor: (row) => row.categoria },
                 { header: 'Tipo', accessor: (row) => row.tipo },
@@ -485,14 +485,34 @@ const Cierre = () => {
                 { header: 'Usuario', accessor: (row) => row.nombreUsuario }
             ];
 
-            // Build detailed data for PDF including all transactions from all categories
             pdfData = [];
-            
+
+            // Resumen general consolidado (totales globales en córdobas)
+            pdfData.push({
+                categoria: 'CONSOLIDADO',
+                tipo: 'RESUMEN GENERAL',
+                descripcion: `Total Ingresos: ${monedaSimbolo}${totalIngresos.toFixed(2)} | Total Egresos: ${monedaSimbolo}${totalEgresos.toFixed(2)} | Saldo: ${monedaSimbolo}${saldoCierre.toFixed(2)}`,
+                fechaRegistro: '',
+                monto: '',
+                nombreUsuario: ''
+            });
+
+            // Línea vacía separadora
+            pdfData.push({
+                categoria: '',
+                tipo: '',
+                descripcion: '',
+                fechaRegistro: '',
+                monto: '',
+                nombreUsuario: ''
+            });
+
+            // Detalle por categoría
             consolidatedData.resumenPorTipo.forEach(item => {
                 const currencySymbol = item.tipoMoneda === "Dolares" ? "$" : "C$";
                 const categoria = `${item.tipoPago} - ${item.tipoMoneda}`;
-                
-                // Add summary row for this category
+
+                // Resumen por categoría
                 pdfData.push({
                     categoria,
                     tipo: 'RESUMEN',
@@ -501,8 +521,8 @@ const Cierre = () => {
                     monto: '',
                     nombreUsuario: ''
                 });
-                
-                // Add all ingresos for this category
+
+                // Ingresos
                 if (item.ingresos && item.ingresos.length > 0) {
                     item.ingresos.forEach(ing => {
                         pdfData.push({
@@ -515,8 +535,8 @@ const Cierre = () => {
                         });
                     });
                 }
-                
-                // Add all egresos for this category
+
+                // Egresos
                 if (item.egresos && item.egresos.length > 0) {
                     item.egresos.forEach(egr => {
                         pdfData.push({
@@ -529,6 +549,16 @@ const Cierre = () => {
                         });
                     });
                 }
+
+                // Separador entre categorías
+                pdfData.push({
+                    categoria: '',
+                    tipo: '',
+                    descripcion: '',
+                    fechaRegistro: '',
+                    monto: '',
+                    nombreUsuario: ''
+                });
             });
 
             analytics = {
@@ -545,7 +575,7 @@ const Cierre = () => {
                 }))
             };
         } else {
-            // Export segmented data (existing logic)
+            // Segmentado
             columns = [
                 { header: 'Tipo', accessor: (row) => row.tipo },
                 { header: 'Descripción', accessor: (row) => row.descripcion },
@@ -714,11 +744,11 @@ const Cierre = () => {
 
                             {/* Results Summary */}
                             {(cierreData || consolidatedData) && (
-                                <Row className="mb-4">
+                                <Row className="mb-4 resumen-row">
                                     <Col sm={12}>
                                         <Card className="border-left-primary shadow h-100 py-2">
                                             <CardBody>
-                                                <Row className="no-gutters align-items-center">
+                                                <Row className="no-gutters align-items-center resumen-row">
                                                     <Col sm={4} className="text-center">
                                                         <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                             Total Ingresos
@@ -750,12 +780,28 @@ const Cierre = () => {
                                 </Row>
                             )}
 
+                            {/* Export Buttons */}
+                            {(cierreData || consolidatedData) && (
+                                <Row className="mb-3 export-buttons-row">
+                                    <Col sm={6} className="export-btn-col">
+                                        <Button color="success" size="sm" onClick={exportToExcelHandler}>
+                                            <i className="fa fa-file-excel" aria-hidden="true"></i> Exportar Excel
+                                        </Button>
+                                    </Col>
+                                    <Col sm={6} className="text-right export-btn-col">
+                                        <Button color="danger" size="sm" onClick={exportToPDFHandler}>
+                                            <i className="fa fa-file-pdf" aria-hidden="true"></i> Exportar PDF
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            )}
+
                             {/* Consolidated Report Details */}
                             {consolidatedData && (
-                                <Row className="mb-4">
+                                <Row className="mb-4 resumen-row-consolidado">
                                     <Col sm={12}>
                                         <h5 className="text-primary mb-3">Detalle por Tipo de Pago y Moneda:</h5>
-                                        <Row>
+                                        <Row className="resumen-row-consolidado">
                                             {consolidatedData.resumenPorTipo.map((item, index) => (
                                                 <Col sm={6} key={index} className="mb-4">
                                                     <Card className="border-left-info shadow">
@@ -795,7 +841,7 @@ const Cierre = () => {
                                                                 </Col>
                                                             </Row>
                                                             
-                                                                            <Row>
+                                                                            <Row className="resumen-row-consolidado">
                                                                                 <Col sm={6}>
                                                                                     <h6 className="text-success">Ingresos ({item.ingresos ? item.ingresos.length : 0})</h6>
                                                                                     <DataTable
@@ -886,27 +932,13 @@ const Cierre = () => {
                                 </Row>
                             )}
 
-                            {/* Export Buttons */}
-                            {(cierreData || consolidatedData) && (
-                                <Row className="mb-3">
-                                    <Col sm={6}>
-                                        <Button color="success" size="sm" onClick={exportToExcelHandler}>
-                                            <i className="fa fa-file-excel" aria-hidden="true"></i> Exportar Excel
-                                        </Button>
-                                    </Col>
-                                    <Col sm={6} className="text-right">
-                                        <Button color="danger" size="sm" onClick={exportToPDFHandler}>
-                                            <i className="fa fa-file-pdf" aria-hidden="true"></i> Exportar PDF
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            )}
+                            
 
                             {/* Tables Section - Only show in segmentation mode */}
                             {cierreData && reportMode === "Segmentación por método y moneda" && (
                                 <>
                                     <hr />
-                                    <Row>
+                                    <Row className="resumen-row">
                                         <Col sm={6}>
                                             <h5 className="text-success">Ingresos ({ingresos.length})</h5>
                                             <DataTable

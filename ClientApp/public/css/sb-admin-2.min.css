@@ -12746,3 +12746,41 @@ body.sidebar-toggled footer.sticky-footer {
     justify-content: center;
   }
 }
+
+@media (max-width: 575.98px) {
+  .export-btn-col {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 980px) {
+  .resumen-row {
+    flex-direction: column;
+  }
+
+  .resumen-row .col-sm-6 {
+    max-width: 100%;
+  }
+}
+
+.resumen-row-consolidado {
+  flex-direction: column;
+}
+
+.resumen-row-consolidado .col-sm-6 {
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .export-buttons-row {
+    display: flex;
+  }
+
+  .export-buttons-row .col-sm-6 {
+    width: 50%;
+  }
+
+
+}
