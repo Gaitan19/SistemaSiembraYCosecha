@@ -162,36 +162,143 @@ const Cierre = () => {
                     
                     const tipoCambio = parseFloat(tipoCambioDolar);
                     
-                    // Mock data structure for testing
+                    // Mock data structure for testing with detailed transactions
                     const mockData = {
                         resumenPorTipo: [
                             {
                                 tipoPago: "Efectivo",
                                 tipoMoneda: "Cordobas",
-                                totalIngresos: 50000.00,
-                                totalEgresos: 15000.00,
-                                saldoCierre: 35000.00
+                                totalIngresos: 124800.00, // 121900 + 2800 + 100
+                                totalEgresos: 800.00,
+                                saldoCierre: 124000.00, // 124800 - 800
+                                ingresos: [
+                                    {
+                                        descripcion: "Pago de venta #000003",
+                                        fechaRegistro: "09/09/2025 17:25",
+                                        monto: 121900.00,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "kenley"
+                                    },
+                                    {
+                                        descripcion: "Pago de venta #000002",
+                                        fechaRegistro: "09/09/2025 16:15",
+                                        monto: 2800.00,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "victor"
+                                    },
+                                    {
+                                        descripcion: "Pago de venta #000001",
+                                        fechaRegistro: "09/09/2025 14:30",
+                                        monto: 100.00,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "kenley"
+                                    }
+                                ],
+                                egresos: [
+                                    {
+                                        descripcion: "egreso efectivo cordobas",
+                                        fechaRegistro: "09/09/2025 12:00",
+                                        monto: 800.00,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "kenley"
+                                    }
+                                ]
                             },
                             {
                                 tipoPago: "Efectivo",
                                 tipoMoneda: "Dolares",
-                                totalIngresos: 800.00 * tipoCambio, // Convert to córdobas
+                                totalIngresos: (500.00 + 300.00) * tipoCambio, // (800 * tipoCambio)
                                 totalEgresos: 200.00 * tipoCambio,
-                                saldoCierre: 600.00 * tipoCambio
+                                saldoCierre: 600.00 * tipoCambio,
+                                ingresos: [
+                                    {
+                                        descripcion: "Pago de venta #000004",
+                                        fechaRegistro: "09/09/2025 15:45",
+                                        monto: 500.00 * tipoCambio,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "maria"
+                                    },
+                                    {
+                                        descripcion: "Pago de venta #000005",
+                                        fechaRegistro: "09/09/2025 13:20",
+                                        monto: 300.00 * tipoCambio,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "carlos"
+                                    }
+                                ],
+                                egresos: [
+                                    {
+                                        descripcion: "egreso efectivo dolares",
+                                        fechaRegistro: "09/09/2025 11:30",
+                                        monto: 200.00 * tipoCambio,
+                                        tipoPago: "Efectivo",
+                                        nombreUsuario: "ana"
+                                    }
+                                ]
                             },
                             {
                                 tipoPago: "Transferencia",
                                 tipoMoneda: "Cordobas",
-                                totalIngresos: 75000.00,
+                                totalIngresos: 75000.00, // 45000 + 30000
                                 totalEgresos: 25000.00,
-                                saldoCierre: 50000.00
+                                saldoCierre: 50000.00,
+                                ingresos: [
+                                    {
+                                        descripcion: "Transferencia pago venta #000006",
+                                        fechaRegistro: "09/09/2025 16:00",
+                                        monto: 45000.00,
+                                        tipoPago: "Transferencia",
+                                        nombreUsuario: "luis"
+                                    },
+                                    {
+                                        descripcion: "Transferencia pago venta #000007",
+                                        fechaRegistro: "09/09/2025 14:45",
+                                        monto: 30000.00,
+                                        tipoPago: "Transferencia",
+                                        nombreUsuario: "sofia"
+                                    }
+                                ],
+                                egresos: [
+                                    {
+                                        descripcion: "egreso transferencia cordobas",
+                                        fechaRegistro: "09/09/2025 10:15",
+                                        monto: 25000.00,
+                                        tipoPago: "Transferencia",
+                                        nombreUsuario: "pedro"
+                                    }
+                                ]
                             },
                             {
                                 tipoPago: "Transferencia",
                                 tipoMoneda: "Dolares",
-                                totalIngresos: 1200.00 * tipoCambio, // Convert to córdobas
+                                totalIngresos: (700.00 + 500.00) * tipoCambio, // (1200 * tipoCambio)
                                 totalEgresos: 300.00 * tipoCambio,
-                                saldoCierre: 900.00 * tipoCambio
+                                saldoCierre: 900.00 * tipoCambio,
+                                ingresos: [
+                                    {
+                                        descripcion: "Transferencia pago venta #000008",
+                                        fechaRegistro: "09/09/2025 17:10",
+                                        monto: 700.00 * tipoCambio,
+                                        tipoPago: "Transferencia",
+                                        nombreUsuario: "diego"
+                                    },
+                                    {
+                                        descripcion: "Transferencia pago venta #000009",
+                                        fechaRegistro: "09/09/2025 15:30",
+                                        monto: 500.00 * tipoCambio,
+                                        tipoPago: "Transferencia",
+                                        nombreUsuario: "elena"
+                                    }
+                                ],
+                                egresos: [
+                                    {
+                                        descripcion: "egreso transferencia dolares",
+                                        fechaRegistro: "09/09/2025 09:45",
+                                        monto: 300.00 * tipoCambio,
+                                        tipoPago: "Transferencia",
+                                        nombreUsuario: "miguel"
+                                    }
+                                ]
                             }
                         ]
                     };
@@ -643,13 +750,13 @@ const Cierre = () => {
                                         <h5 className="text-primary mb-3">Detalle por Tipo de Pago y Moneda:</h5>
                                         <Row>
                                             {consolidatedData.resumenPorTipo.map((item, index) => (
-                                                <Col sm={6} key={index} className="mb-3">
+                                                <Col sm={6} key={index} className="mb-4">
                                                     <Card className="border-left-info shadow">
                                                         <CardBody>
                                                             <h6 className="text-info font-weight-bold">
                                                                 {item.tipoPago} - {item.tipoMoneda}
                                                             </h6>
-                                                            <Row className="no-gutters">
+                                                            <Row className="no-gutters mb-3">
                                                                 <Col sm={4} className="text-center">
                                                                     <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                                         Ingresos
@@ -673,6 +780,34 @@ const Cierre = () => {
                                                                     <div className={`h6 mb-0 font-weight-bold ${item.saldoCierre >= 0 ? 'text-success' : 'text-danger'}`}>
                                                                         C${item.saldoCierre.toFixed(2)}
                                                                     </div>
+                                                                </Col>
+                                                            </Row>
+                                                            
+                                                            {/* Transaction Tables for each category */}
+                                                            <Row>
+                                                                <Col sm={6}>
+                                                                    <h6 className="text-success">Ingresos ({item.ingresos ? item.ingresos.length : 0})</h6>
+                                                                    <DataTable
+                                                                        columns={ingresosColumns}
+                                                                        data={item.ingresos || []}
+                                                                        customStyles={customStyles}
+                                                                        pagination
+                                                                        paginationPerPage={5}
+                                                                        noDataComponent="No hay ingresos para mostrar"
+                                                                        dense
+                                                                    />
+                                                                </Col>
+                                                                <Col sm={6}>
+                                                                    <h6 className="text-danger">Egresos ({item.egresos ? item.egresos.length : 0})</h6>
+                                                                    <DataTable
+                                                                        columns={egresosColumns}
+                                                                        data={item.egresos || []}
+                                                                        customStyles={customStyles}
+                                                                        pagination
+                                                                        paginationPerPage={5}
+                                                                        noDataComponent="No hay egresos para mostrar"
+                                                                        dense
+                                                                    />
                                                                 </Col>
                                                             </Row>
                                                         </CardBody>
