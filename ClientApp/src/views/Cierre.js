@@ -125,16 +125,17 @@ const Cierre = () => {
                 // New logic for consolidated report using real API calls
                 const tipoCambio = parseFloat(tipoCambioDolar);
                 
-                // Define the 4 combinations we need to fetch
+                // Define the 5 combinations we need to fetch
                 const combinations = [
                     { tipoPago: "Efectivo", tipoDinero: "Cordobas" },
                     { tipoPago: "Efectivo", tipoDinero: "Dolares" },
                     { tipoPago: "Transferencia", tipoDinero: "Cordobas" },
-                    { tipoPago: "Transferencia", tipoDinero: "Dolares" }
+                    { tipoPago: "Transferencia", tipoDinero: "Dolares" },
+                    { tipoPago: "Tarjeta", tipoDinero: "Cordobas" }
                 ];
                 
                 try {
-                    // Make all 4 API calls in parallel
+                    // Make all 5 API calls in parallel
                     const promises = combinations.map(combo => {
                         const url = `api/cierre/Calcular?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&tipoPago=${combo.tipoPago}&tipoDinero=${combo.tipoDinero}`;
                         return fetch(url).then(response => {
@@ -227,6 +228,13 @@ const Cierre = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dateRange, startDate, endDate, reportMode, tipoPago, tipoDinero, tipoCambioDolar]);
+
+    // Auto-select Cordobas when Tarjeta is selected
+    useEffect(() => {
+        if (tipoPago === "Tarjeta") {
+            setTipoDinero("Cordobas");
+        }
+    }, [tipoPago]);
 
     // Columns for Ingresos table
     const ingresosColumns = [
@@ -646,6 +654,7 @@ const Cierre = () => {
                                                     <option value="">Seleccionar...</option>
                                                     <option value="Transferencia">Transferencia</option>
                                                     <option value="Efectivo">Efectivo</option>
+                                                    <option value="Tarjeta">Tarjeta</option>
                                                 </select>
                                             </FormGroup>
                                         </Col>
@@ -657,6 +666,7 @@ const Cierre = () => {
                                                     className="form-control form-control-sm"
                                                     value={tipoDinero}
                                                     onChange={(e) => setTipoDinero(e.target.value)}
+                                                    disabled={tipoPago === "Tarjeta"}
                                                 >
                                                     <option value="">Seleccionar...</option>
                                                     <option value="Cordobas">Cordobas</option>
