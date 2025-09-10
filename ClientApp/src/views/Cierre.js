@@ -148,34 +148,17 @@ const Cierre = () => {
                     
                     const results = await Promise.all(promises);
                     
-                    // Process results and convert dollar amounts to córdobas
+                    // Process results - keep original amounts, only convert balance for dollars
                     const resumenPorTipo = results.map(result => {
                         const isDolares = result.tipoDinero === "Dolares";
                         
-                        // Convert amounts if in dollars
-                        const convertAmount = (amount) => isDolares ? parseFloat(amount) * tipoCambio : parseFloat(amount);
-                        
-                        // Convert individual transactions
-                        const ingresosConvertidos = result.ingresos.map(ingreso => ({
-                            descripcion: ingreso.descripcion,
-                            fechaRegistro: ingreso.fechaRegistro,
-                            monto: convertAmount(ingreso.monto),
-                            tipoPago: ingreso.tipoPago,
-                            nombreUsuario: ingreso.nombreUsuario
-                        }));
-                        
-                        const egresosConvertidos = result.egresos.map(egreso => ({
-                            descripcion: egreso.descripcion,
-                            fechaRegistro: egreso.fechaRegistro,
-                            monto: convertAmount(egreso.monto),
-                            tipoPago: egreso.tipoPago,
-                            nombreUsuario: egreso.nombreUsuario
-                        }));
-                        
-                        // Calculate totals in córdobas
-                        const totalIngresos = isDolares ? result.totalIngresos * tipoCambio : result.totalIngresos;
-                        const totalEgresos = isDolares ? result.totalEgresos * tipoCambio : result.totalEgresos;
+                        // Keep original amounts for ingresos and egresos
+                        const totalIngresos = result.totalIngresos;
+                        const totalEgresos = result.totalEgresos;
                         const saldoCierre = totalIngresos - totalEgresos;
+                        
+                        // For dollars, also calculate córdoba equivalent for balance only
+                        const saldoCierreCordobas = isDolares ? saldoCierre * tipoCambio : null;
                         
                         return {
                             tipoPago: result.tipoPago,
@@ -183,8 +166,9 @@ const Cierre = () => {
                             totalIngresos,
                             totalEgresos,
                             saldoCierre,
-                            ingresos: ingresosConvertidos,
-                            egresos: egresosConvertidos
+                            saldoCierreCordobas, // Only balance is converted for dollars
+                            ingresos: result.ingresos, // Keep original transaction data
+                            egresos: result.egresos  // Keep original transaction data
                         };
                     });
                     
@@ -195,13 +179,16 @@ const Cierre = () => {
                     setIngresos([]);
                     setEgresos([]);
                     
-                    // Calculate overall totals
+                    // Calculate overall totals - convert dollar amounts to córdobas for global total
                     let totalIngresosConsolidado = 0;
                     let totalEgresosConsolidado = 0;
                     
                     consolidatedData.resumenPorTipo.forEach(item => {
-                        totalIngresosConsolidado += item.totalIngresos;
-                        totalEgresosConsolidado += item.totalEgresos;
+                        const isDolares = item.tipoMoneda === "Dolares";
+                        const conversionFactor = isDolares ? tipoCambio : 1;
+                        
+                        totalIngresosConsolidado += item.totalIngresos * conversionFactor;
+                        totalEgresosConsolidado += item.totalEgresos * conversionFactor;
                     });
                     
                     setTotalIngresos(totalIngresosConsolidado);
@@ -656,7 +643,7 @@ const Cierre = () => {
                                                                         Ingresos
                                                                     </div>
                                                                     <div className="h6 mb-0 text-gray-800">
-                                                                        C${item.totalIngresos.toFixed(2)}
+                                                                        {item.tipoMoneda === "Dolares" ? "$" : "C$"}{item.totalIngresos.toFixed(2)}
                                                                     </div>
                                                                 </Col>
                                                                 <Col sm={4} className="text-center">
@@ -664,7 +651,7 @@ const Cierre = () => {
                                                                         Egresos
                                                                     </div>
                                                                     <div className="h6 mb-0 text-gray-800">
-                                                                        C${item.totalEgresos.toFixed(2)}
+                                                                        {item.tipoMoneda === "Dolares" ? "$" : "C$"}{item.totalEgresos.toFixed(2)}
                                                                     </div>
                                                                 </Col>
                                                                 <Col sm={4} className="text-center">
@@ -672,38 +659,98 @@ const Cierre = () => {
                                                                         Saldo
                                                                     </div>
                                                                     <div className={`h6 mb-0 font-weight-bold ${item.saldoCierre >= 0 ? 'text-success' : 'text-danger'}`}>
-                                                                        C${item.saldoCierre.toFixed(2)}
+                                                                        {item.tipoMoneda === "Dolares" ? "$" : "C$"}{item.saldoCierre.toFixed(2)}
                                                                     </div>
+                                                                    {item.tipoMoneda === "Dolares" && (
+                                                                        <div className="text-xs text-muted mt-1">
+                                                                            <strong>Saldo en Córdobas:</strong> C${item.saldoCierreCordobas.toFixed(2)}
+                                                                        </div>
+                                                                    )}
                                                                 </Col>
                                                             </Row>
                                                             
-                                                            {/* Transaction Tables for each category */}
-                                                            <Row>
-                                                                <Col sm={6}>
-                                                                    <h6 className="text-success">Ingresos ({item.ingresos ? item.ingresos.length : 0})</h6>
-                                                                    <DataTable
-                                                                        columns={ingresosColumns}
-                                                                        data={item.ingresos || []}
-                                                                        customStyles={customStyles}
-                                                                        pagination
-                                                                        paginationPerPage={5}
-                                                                        noDataComponent="No hay ingresos para mostrar"
-                                                                        dense
-                                                                    />
-                                                                </Col>
-                                                                <Col sm={6}>
-                                                                    <h6 className="text-danger">Egresos ({item.egresos ? item.egresos.length : 0})</h6>
-                                                                    <DataTable
-                                                                        columns={egresosColumns}
-                                                                        data={item.egresos || []}
-                                                                        customStyles={customStyles}
-                                                                        pagination
-                                                                        paginationPerPage={5}
-                                                                        noDataComponent="No hay egresos para mostrar"
-                                                                        dense
-                                                                    />
-                                                                </Col>
-                                                            </Row>
+                                                                            <Row>
+                                                                                <Col sm={6}>
+                                                                                    <h6 className="text-success">Ingresos ({item.ingresos ? item.ingresos.length : 0})</h6>
+                                                                                    <DataTable
+                                                                                        columns={[
+                                                                                            {
+                                                                                                name: "Descripción",
+                                                                                                selector: (row) => row.descripcion,
+                                                                                                sortable: true,
+                                                                                                grow: 2,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Fecha",
+                                                                                                selector: (row) => row.fechaRegistro,
+                                                                                                sortable: true,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Monto",
+                                                                                                selector: (row) => row.monto,
+                                                                                                sortable: true,
+                                                                                                cell: (row) => `${item.tipoMoneda === "Dolares" ? "$" : "C$"}${parseFloat(row.monto).toFixed(2)}`,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Tipo Pago",
+                                                                                                selector: (row) => row.tipoPago,
+                                                                                                sortable: true,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Usuario",
+                                                                                                selector: (row) => row.nombreUsuario,
+                                                                                                sortable: true,
+                                                                                            },
+                                                                                        ]}
+                                                                                        data={item.ingresos || []}
+                                                                                        customStyles={customStyles}
+                                                                                        pagination
+                                                                                        paginationPerPage={5}
+                                                                                        noDataComponent="No hay ingresos para mostrar"
+                                                                                        dense
+                                                                                    />
+                                                                                </Col>
+                                                                                <Col sm={6}>
+                                                                                    <h6 className="text-danger">Egresos ({item.egresos ? item.egresos.length : 0})</h6>
+                                                                                    <DataTable
+                                                                                        columns={[
+                                                                                            {
+                                                                                                name: "Descripción",
+                                                                                                selector: (row) => row.descripcion,
+                                                                                                sortable: true,
+                                                                                                grow: 2,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Fecha",
+                                                                                                selector: (row) => row.fechaRegistro,
+                                                                                                sortable: true,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Monto",
+                                                                                                selector: (row) => row.monto,
+                                                                                                sortable: true,
+                                                                                                cell: (row) => `${item.tipoMoneda === "Dolares" ? "$" : "C$"}${parseFloat(row.monto).toFixed(2)}`,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Tipo Pago",
+                                                                                                selector: (row) => row.tipoPago,
+                                                                                                sortable: true,
+                                                                                            },
+                                                                                            {
+                                                                                                name: "Usuario",
+                                                                                                selector: (row) => row.nombreUsuario,
+                                                                                                sortable: true,
+                                                                                            },
+                                                                                        ]}
+                                                                                        data={item.egresos || []}
+                                                                                        customStyles={customStyles}
+                                                                                        pagination
+                                                                                        paginationPerPage={5}
+                                                                                        noDataComponent="No hay egresos para mostrar"
+                                                                                        dense
+                                                                                    />
+                                                                                </Col>
+                                                                            </Row>
                                                         </CardBody>
                                                     </Card>
                                                 </Col>
