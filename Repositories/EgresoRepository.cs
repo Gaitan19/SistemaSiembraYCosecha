@@ -36,6 +36,7 @@ namespace ReactVentas.Repositories
                             Descripcion = e.Descripcion ?? "",
                             FechaRegistro = e.FechaRegistro.HasValue ? e.FechaRegistro.Value.ToString("dd/MM/yyyy HH:mm") : "",
                             Monto = e.Monto.HasValue ? e.Monto.Value.ToString("F2") : "0.00",
+                            TipoPago = e.TipoPago ?? "",
                             TipoDinero = e.TipoDinero ?? "",
                             IdUsuario = e.IdUsuario ?? 0,
                             NombreUsuario = u.Nombre ?? "",
