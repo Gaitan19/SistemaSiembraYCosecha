@@ -314,7 +314,7 @@ const Cierre = () => {
         let excelData = [];
 
         if (consolidatedData) {
-            // Export consolidated data
+            // Export consolidated data with detailed transactions
             excelData = [
                 {
                     'Concepto': 'RESUMEN CIERRE CONSOLIDADO',
@@ -332,19 +332,83 @@ const Cierre = () => {
                     'Concepto': `Saldo Cierre`,
                     'Valor': `${monedaSimbolo}${saldoCierre.toFixed(2)}`
                 },
-                {},
-                {
-                    'Concepto': 'DETALLE POR TIPO DE PAGO Y MONEDA',
-                    'Valor': ''
-                },
-                ...consolidatedData.resumenPorTipo.map(item => ({
-                    'Tipo de Pago': item.tipoPago,
-                    'Tipo de Moneda': item.tipoMoneda,
-                    'Total Ingresos': `C$${item.totalIngresos.toFixed(2)}`,
-                    'Total Egresos': `C$${item.totalEgresos.toFixed(2)}`,
-                    'Saldo Cierre': `C$${item.saldoCierre.toFixed(2)}`
-                }))
+                {}
             ];
+
+            // Add detailed information for each payment type/currency combination
+            consolidatedData.resumenPorTipo.forEach(item => {
+                const currencySymbol = item.tipoMoneda === "Dolares" ? "$" : "C$";
+                
+                // Category header
+                excelData.push({
+                    'Concepto': `${item.tipoPago.toUpperCase()} - ${item.tipoMoneda.toUpperCase()}`,
+                    'Valor': ''
+                });
+                
+                // Category summary
+                excelData.push({
+                    'Concepto': `Total Ingresos`,
+                    'Valor': `${currencySymbol}${item.totalIngresos.toFixed(2)}`
+                });
+                excelData.push({
+                    'Concepto': `Total Egresos`,
+                    'Valor': `${currencySymbol}${item.totalEgresos.toFixed(2)}`
+                });
+                excelData.push({
+                    'Concepto': `Saldo`,
+                    'Valor': `${currencySymbol}${item.saldoCierre.toFixed(2)}`
+                });
+                
+                // Add córdoba equivalent for dollar categories
+                if (item.tipoMoneda === "Dolares") {
+                    excelData.push({
+                        'Concepto': `Saldo en Córdobas`,
+                        'Valor': `C$${item.saldoCierreCordobas.toFixed(2)}`
+                    });
+                }
+                
+                excelData.push({});
+                
+                // Detailed Ingresos
+                if (item.ingresos && item.ingresos.length > 0) {
+                    excelData.push({
+                        'Concepto': `INGRESOS DETALLADOS (${item.ingresos.length})`,
+                        'Valor': ''
+                    });
+                    
+                    item.ingresos.forEach(ing => {
+                        excelData.push({
+                            'Descripción': ing.descripcion,
+                            'Fecha': ing.fechaRegistro,
+                            'Monto': `${currencySymbol}${parseFloat(ing.monto).toFixed(2)}`,
+                            'Tipo Pago': ing.tipoPago,
+                            'Usuario': ing.nombreUsuario
+                        });
+                    });
+                    
+                    excelData.push({});
+                }
+                
+                // Detailed Egresos
+                if (item.egresos && item.egresos.length > 0) {
+                    excelData.push({
+                        'Concepto': `EGRESOS DETALLADOS (${item.egresos.length})`,
+                        'Valor': ''
+                    });
+                    
+                    item.egresos.forEach(egr => {
+                        excelData.push({
+                            'Descripción': egr.descripcion,
+                            'Fecha': egr.fechaRegistro,
+                            'Monto': `${currencySymbol}${parseFloat(egr.monto).toFixed(2)}`,
+                            'Tipo Pago': egr.tipoPago,
+                            'Usuario': egr.nombreUsuario
+                        });
+                    });
+                    
+                    excelData.push({});
+                }
+            });
         } else {
             // Export segmented data (existing logic)
             excelData = [
@@ -403,22 +467,74 @@ const Cierre = () => {
         let columns, pdfData, analytics;
 
         if (consolidatedData) {
-            // Export consolidated data
+            // Export consolidated data with detailed transactions
             columns = [
-                { header: 'Tipo Pago', accessor: (row) => row.tipoPago },
-                { header: 'Tipo Moneda', accessor: (row) => row.tipoMoneda },
-                { header: 'Total Ingresos', accessor: (row) => `C$${row.totalIngresos.toFixed(2)}` },
-                { header: 'Total Egresos', accessor: (row) => `C$${row.totalEgresos.toFixed(2)}` },
-                { header: 'Saldo Cierre', accessor: (row) => `C$${row.saldoCierre.toFixed(2)}` }
+                { header: 'Categoría', accessor: (row) => row.categoria },
+                { header: 'Tipo', accessor: (row) => row.tipo },
+                { header: 'Descripción', accessor: (row) => row.descripcion },
+                { header: 'Fecha', accessor: (row) => row.fechaRegistro },
+                { header: 'Monto', accessor: (row) => row.monto },
+                { header: 'Usuario', accessor: (row) => row.nombreUsuario }
             ];
 
-            pdfData = consolidatedData.resumenPorTipo;
+            // Build detailed data for PDF including all transactions from all categories
+            pdfData = [];
+            
+            consolidatedData.resumenPorTipo.forEach(item => {
+                const currencySymbol = item.tipoMoneda === "Dolares" ? "$" : "C$";
+                const categoria = `${item.tipoPago} - ${item.tipoMoneda}`;
+                
+                // Add summary row for this category
+                pdfData.push({
+                    categoria,
+                    tipo: 'RESUMEN',
+                    descripcion: `Ingresos: ${currencySymbol}${item.totalIngresos.toFixed(2)} | Egresos: ${currencySymbol}${item.totalEgresos.toFixed(2)} | Saldo: ${currencySymbol}${item.saldoCierre.toFixed(2)}${item.tipoMoneda === "Dolares" ? ` (C$${item.saldoCierreCordobas.toFixed(2)})` : ''}`,
+                    fechaRegistro: '',
+                    monto: '',
+                    nombreUsuario: ''
+                });
+                
+                // Add all ingresos for this category
+                if (item.ingresos && item.ingresos.length > 0) {
+                    item.ingresos.forEach(ing => {
+                        pdfData.push({
+                            categoria,
+                            tipo: 'Ingreso',
+                            descripcion: ing.descripcion,
+                            fechaRegistro: ing.fechaRegistro,
+                            monto: `${currencySymbol}${parseFloat(ing.monto).toFixed(2)}`,
+                            nombreUsuario: ing.nombreUsuario
+                        });
+                    });
+                }
+                
+                // Add all egresos for this category
+                if (item.egresos && item.egresos.length > 0) {
+                    item.egresos.forEach(egr => {
+                        pdfData.push({
+                            categoria,
+                            tipo: 'Egreso',
+                            descripcion: egr.descripcion,
+                            fechaRegistro: egr.fechaRegistro,
+                            monto: `${currencySymbol}${parseFloat(egr.monto).toFixed(2)}`,
+                            nombreUsuario: egr.nombreUsuario
+                        });
+                    });
+                }
+            });
 
             analytics = {
-                type: 'consolidated_closure',
+                type: 'consolidated_closure_detailed',
                 totalIngresos: `${monedaSimbolo}${totalIngresos.toFixed(2)}`,
                 totalEgresos: `${monedaSimbolo}${totalEgresos.toFixed(2)}`,
-                saldoCierre: `${monedaSimbolo}${saldoCierre.toFixed(2)}`
+                saldoCierre: `${monedaSimbolo}${saldoCierre.toFixed(2)}`,
+                details: consolidatedData.resumenPorTipo.map(item => ({
+                    category: `${item.tipoPago} - ${item.tipoMoneda}`,
+                    ingresos: `${item.tipoMoneda === "Dolares" ? "$" : "C$"}${item.totalIngresos.toFixed(2)}`,
+                    egresos: `${item.tipoMoneda === "Dolares" ? "$" : "C$"}${item.totalEgresos.toFixed(2)}`,
+                    saldo: `${item.tipoMoneda === "Dolares" ? "$" : "C$"}${item.saldoCierre.toFixed(2)}`,
+                    saldoCordobas: item.tipoMoneda === "Dolares" ? `C$${item.saldoCierreCordobas.toFixed(2)}` : null
+                }))
             };
         } else {
             // Export segmented data (existing logic)
