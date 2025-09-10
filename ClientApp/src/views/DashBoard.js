@@ -406,7 +406,7 @@ const DashBoard = () => {
                     </div>
                 </div>
 
-                <div className="col-xl-3 col-md-6 mb-4">
+                <div className="col-xl-3 col-md-6 mb-4" style={{display:'none'}}>
                     <div className="card border-left-success shadow h-100 py-2">
                         <div className="card-body">
                             <div className="row no-gutters align-items-center">
