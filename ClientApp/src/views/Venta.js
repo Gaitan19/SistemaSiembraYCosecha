@@ -103,7 +103,7 @@ const Venta = () => {
 
   // Recalculate change when payment type changes
   useEffect(() => {
-    if (tipoPago === "Transferencia") {
+    if (tipoPago === "Transferencia" || tipoPago === "Tarjeta") {
       // Si el tipo de dinero es dólares, convertir
       if (tipoDinero === "Dolares") {
         if (tipoCambio > 0) {
@@ -179,17 +179,18 @@ const Venta = () => {
 
   const agregarProductoAlCarrito = async (producto) => {
     const unidadesDisponibles = producto.unidades ?? 0;
-    const tieneUnidadesGestionadas = producto.unidades !== null && producto.unidades !== undefined;
+    const tieneUnidadesGestionadas =
+      producto.unidades !== null && producto.unidades !== undefined;
 
     Swal.fire({
       title: producto.nombre || producto.descripcion,
-      text: tieneUnidadesGestionadas 
+      text: tieneUnidadesGestionadas
         ? `Ingrese la cantidad (Stock disponible: ${unidadesDisponibles} unidades)`
         : `Ingrese la cantidad (Este producto no gestiona stock)`,
       input: "text",
       inputAttributes: {
         autocapitalize: "off",
-        placeholder: tieneUnidadesGestionadas 
+        placeholder: tieneUnidadesGestionadas
           ? `Máximo ${unidadesDisponibles} unidades`
           : "Cantidad deseada",
       },
@@ -664,10 +665,19 @@ const Venta = () => {
                           type="select"
                           bsSize="sm"
                           value={tipoPago}
-                          onChange={(e) => setTipoPago(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setTipoPago(value);
+
+                            // Si es tarjeta, forzar siempre Cordobas
+                            if (value === "Tarjeta") {
+                              setTipoDinero("Cordobas");
+                            }
+                          }}
                         >
                           <option value="Efectivo">Efectivo</option>
                           <option value="Transferencia">Transferencia</option>
+                          <option value="Tarjeta">Tarjeta</option>
                         </Input>
                       </FormGroup>
                     </Col>
@@ -683,6 +693,7 @@ const Venta = () => {
                           bsSize="sm"
                           value={tipoDinero}
                           onChange={(e) => setTipoDinero(e.target.value)}
+                          disabled={tipoPago === "Tarjeta"} // Siempre en córdobas si es tarjeta
                         >
                           <option value="Cordobas">Córdobas</option>
                           <option value="Dolares">Dólares</option>
@@ -842,14 +853,14 @@ const Venta = () => {
                           step="0.01"
                           value={montoPago}
                           onChange={(e) => {
-                            if (tipoPago !== "Transferencia") {
+                            if (tipoPago !== "Transferencia" || tipoPago !== "Tarjeta") {
                               // Solo permitir modificar si NO es transferencia
                               const valor = e.target.value;
                               setMontoPago(valor);
                               calcularVuelto(valor);
                             }
                           }}
-                          readOnly={tipoPago === "Transferencia"}
+                          readOnly={tipoPago === "Transferencia" || tipoPago === "Tarjeta"} // For Transferencia, montoPago is always equal to total
                           placeholder="Monto que paga el cliente"
                         />
                       </InputGroup>

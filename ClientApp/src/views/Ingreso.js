@@ -16,7 +16,11 @@ import {
   Col,
 } from "reactstrap";
 import Swal from "sweetalert2";
-import { exportToPDF, exportToExcel, applySearchFilter } from "../utils/exportHelpers";
+import {
+  exportToPDF,
+  exportToExcel,
+  applySearchFilter,
+} from "../utils/exportHelpers";
 import { UserContext } from "../context/UserProvider";
 
 const modeloIngreso = {
@@ -42,17 +46,24 @@ const Ingreso = () => {
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
 
   const handleChange = (e) => {
-    let value = e.target.value;
-    
-    // Convert monto to number if it's the monto field
-    if (e.target.name === "monto") {
+    let { name, value } = e.target;
+
+    if (name === "monto") {
       value = parseFloat(value) || 0;
     }
 
-    setIngreso({
-      ...ingreso,
-      [e.target.name]: value,
-    });
+    if (name === "tipoPago" && value === "Tarjeta") {
+      setIngreso({
+        ...ingreso,
+        [name]: value,
+        tipoDinero: "Cordobas", // 👈 se fuerza Cordobas
+      });
+    } else {
+      setIngreso({
+        ...ingreso,
+        [name]: value,
+      });
+    }
   };
 
   // Combined filtering function that applies both search and status filters
@@ -61,9 +72,9 @@ const Ingreso = () => {
 
     // Apply status filter
     if (statusValue === "activos") {
-      filtered = filtered.filter(item => item.esActivo === true);
+      filtered = filtered.filter((item) => item.esActivo === true);
     } else if (statusValue === "inactivos") {
-      filtered = filtered.filter(item => item.esActivo === false);
+      filtered = filtered.filter((item) => item.esActivo === false);
     }
     // "todos" shows all items, no additional filtering needed
 
@@ -74,9 +85,9 @@ const Ingreso = () => {
         { accessor: (item) => item.monto },
         { accessor: (item) => item.tipoDinero },
         { accessor: (item) => item.nombreUsuario },
-        { accessor: (item) => item.esActivo ? "activo" : "no activo" }
+        { accessor: (item) => (item.esActivo ? "activo" : "no activo") },
       ];
-      
+
       filtered = applySearchFilter(filtered, searchValue, searchFields);
     }
 
@@ -86,7 +97,7 @@ const Ingreso = () => {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
+
     const filtered = applyFilters(ingresos, value, statusFilter);
     setFilteredIngresos(filtered);
   };
@@ -94,36 +105,39 @@ const Ingreso = () => {
   const handleStatusFilter = (e) => {
     const value = e.target.value;
     setStatusFilter(value);
-    
+
     const filtered = applyFilters(ingresos, searchTerm, value);
     setFilteredIngresos(filtered);
   };
 
   const exportToPDFHandler = () => {
     const columns = [
-      { header: 'Descripción', accessor: (row) => row.descripcion },
-      { header: 'Fecha', accessor: (row) => row.fechaRegistro },
-      { header: 'Monto', accessor: (row) => `$${row.monto}` },
-      { header: 'Tipo', accessor: (row) => row.tipoDinero },
-      { header: 'Usuario', accessor: (row) => row.nombreUsuario },
-      { header: 'Estado', accessor: (row) => row.esActivo ? "Activo" : "No Activo" }
+      { header: "Descripción", accessor: (row) => row.descripcion },
+      { header: "Fecha", accessor: (row) => row.fechaRegistro },
+      { header: "Monto", accessor: (row) => `$${row.monto}` },
+      { header: "Tipo", accessor: (row) => row.tipoDinero },
+      { header: "Usuario", accessor: (row) => row.nombreUsuario },
+      {
+        header: "Estado",
+        accessor: (row) => (row.esActivo ? "Activo" : "No Activo"),
+      },
     ];
-    
-    exportToPDF(filteredIngresos, columns, 'Lista_de_Ingresos');
+
+    exportToPDF(filteredIngresos, columns, "Lista_de_Ingresos");
   };
 
   const exportToExcelHandler = () => {
-    const excelData = filteredIngresos.map(ing => ({
-      'ID': ing.idIngreso,
-      'Descripción': ing.descripcion,
-      'Fecha': ing.fechaRegistro,
-      'Monto': ing.monto,
-      'Tipo': ing.tipoDinero,
-      'Usuario': ing.nombreUsuario,
-      'Estado': ing.esActivo ? "Activo" : "No Activo"
+    const excelData = filteredIngresos.map((ing) => ({
+      ID: ing.idIngreso,
+      Descripción: ing.descripcion,
+      Fecha: ing.fechaRegistro,
+      Monto: ing.monto,
+      Tipo: ing.tipoDinero,
+      Usuario: ing.nombreUsuario,
+      Estado: ing.esActivo ? "Activo" : "No Activo",
     }));
 
-    exportToExcel(excelData, 'Ingresos');
+    exportToExcel(excelData, "Ingresos");
   };
 
   const obtenerIngresos = async () => {
@@ -151,7 +165,7 @@ const Ingreso = () => {
       tipoDinero: data.tipoDinero,
       idUsuario: data.idUsuario,
       esActivo: data.esActivo,
-      fechaRegistro: data.fechaRegistro
+      fechaRegistro: data.fechaRegistro,
     });
     setModoSoloLectura(false);
     setVerModal(!verModal);
@@ -160,7 +174,7 @@ const Ingreso = () => {
   const abrirVerModal = (data) => {
     setIngreso({
       ...data,
-      monto: parseFloat(data.monto) || 0
+      monto: parseFloat(data.monto) || 0,
     });
     setModoSoloLectura(true);
     setVerModal(!verModal);
@@ -176,7 +190,7 @@ const Ingreso = () => {
     try {
       // Get current user data
       const userData = JSON.parse(user);
-      
+
       // Prepare data for sending with PascalCase property names for backend
       const ingresoParaEnviar = {
         Descripcion: ingreso.descripcion,
@@ -184,7 +198,7 @@ const Ingreso = () => {
         TipoPago: ingreso.tipoPago,
         TipoDinero: ingreso.tipoDinero,
         IdUsuario: userData.idUsuario,
-        EsActivo: ingreso.esActivo
+        EsActivo: ingreso.esActivo,
       };
 
       // For edit operations, include the ID but never include FechaRegistro
@@ -297,9 +311,7 @@ const Ingreso = () => {
       name: "Tipo",
       selector: (row) => row.tipoDinero,
       sortable: true,
-      cell: (row) => (
-        `${row.tipoDinero}`
-      ),
+      cell: (row) => `${row.tipoDinero}`,
     },
     {
       name: "Usuario",
@@ -406,8 +418,8 @@ const Ingreso = () => {
                     onChange={handleStatusFilter}
                     bsSize="sm"
                     style={{
-                      border: '2px solid #4e73df',
-                      borderRadius: '5px'
+                      border: "2px solid #4e73df",
+                      borderRadius: "5px",
                     }}
                   >
                     <option value="todos">Todos</option>
@@ -423,23 +435,32 @@ const Ingreso = () => {
                     onChange={handleSearch}
                     bsSize="sm"
                     style={{
-                      border: '2px solid #4e73df',
-                      borderRadius: '5px'
+                      border: "2px solid #4e73df",
+                      borderRadius: "5px",
                     }}
                   />
                 </Col>
                 <Col sm="7" className="text-right">
-                  <Button color="danger" size="sm" className="mr-2" onClick={exportToPDFHandler}>
+                  <Button
+                    color="danger"
+                    size="sm"
+                    className="mr-2"
+                    onClick={exportToPDFHandler}
+                  >
                     <i className="fas fa-file-pdf mr-1"></i>
                     PDF
                   </Button>
-                  <Button color="success" size="sm" onClick={exportToExcelHandler}>
+                  <Button
+                    color="success"
+                    size="sm"
+                    onClick={exportToExcelHandler}
+                  >
                     <i className="fas fa-file-excel mr-1"></i>
                     Excel
                   </Button>
                 </Col>
               </Row>
-              
+
               <DataTable
                 columns={columns}
                 data={filteredIngresos}
@@ -456,7 +477,12 @@ const Ingreso = () => {
       </Row>
 
       <Modal isOpen={verModal} toggle={cerrarModal} size="lg">
-        <form onSubmit={(e) => { e.preventDefault(); guardarCambios(); }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            guardarCambios();
+          }}
+        >
           <ModalHeader toggle={cerrarModal}>
             {ingreso.idIngreso === 0 ? "Nuevo Ingreso" : "Editar Ingreso"}
           </ModalHeader>
@@ -509,6 +535,7 @@ const Ingreso = () => {
                   >
                     <option value="Efectivo">Efectivo</option>
                     <option value="Transferencia">Transferencia</option>
+                    <option value="Tarjeta">Tarjeta</option>
                   </Input>
                 </FormGroup>
               </Col>
@@ -523,7 +550,7 @@ const Ingreso = () => {
                     name="tipoDinero"
                     onChange={handleChange}
                     value={ingreso.tipoDinero}
-                    disabled={modoSoloLectura}
+                    disabled={modoSoloLectura || ingreso.tipoPago === "Tarjeta"}
                   >
                     <option value="Cordobas">Cordobas</option>
                     <option value="Dolares">Dolares</option>
@@ -534,7 +561,6 @@ const Ingreso = () => {
             {/* Only show date and status fields for existing records */}
             {ingreso.idIngreso !== 0 && (
               <Row>
-                
                 <Col sm={6}>
                   <FormGroup>
                     <Label>Estado</Label>
@@ -546,11 +572,13 @@ const Ingreso = () => {
                         const value = e.target.value === "true";
                         setIngreso({
                           ...ingreso,
-                          esActivo: value
+                          esActivo: value,
                         });
                       }}
                       value={ingreso.esActivo ? "true" : "false"}
-                      disabled={modoSoloLectura}
+                      disabled={
+                        modoSoloLectura || ingreso.tipoPago === "Tarjeta"
+                      }
                     >
                       <option value="true">Activo</option>
                       <option value="false">Inactivo</option>
@@ -573,7 +601,7 @@ const Ingreso = () => {
                         const value = e.target.value === "true";
                         setIngreso({
                           ...ingreso,
-                          esActivo: value
+                          esActivo: value,
                         });
                       }}
                       value={ingreso.esActivo ? "true" : "false"}
