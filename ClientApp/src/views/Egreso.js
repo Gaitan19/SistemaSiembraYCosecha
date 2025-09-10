@@ -42,18 +42,26 @@ const Egreso = () => {
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
 
   const handleChange = (e) => {
-    let value = e.target.value;
-    
-    // Convert monto to number if it's the monto field
-    if (e.target.name === "monto") {
-      value = parseFloat(value) || 0;
-    }
+  let { name, value } = e.target;
 
+  if (name === "monto") {
+    value = parseFloat(value) || 0;
+  }
+
+  if (name === "tipoPago" && value === "Tarjeta") {
     setEgreso({
       ...egreso,
-      [e.target.name]: value,
+      [name]: value,
+      tipoDinero: "Cordobas", // 👈 se fuerza Cordobas
     });
-  };
+  } else {
+    setEgreso({
+      ...egreso,
+      [name]: value,
+    });
+  }
+};
+
 
   // Combined filtering function that applies both search and status filters
   const applyFilters = (data, searchValue, statusValue) => {
@@ -509,6 +517,7 @@ const Egreso = () => {
                   >
                     <option value="Efectivo">Efectivo</option>
                     <option value="Transferencia">Transferencia</option>
+                    <option value="Tarjeta">Tarjeta</option>
                   </Input>
                 </FormGroup>
               </Col>
@@ -523,7 +532,7 @@ const Egreso = () => {
                     name="tipoDinero"
                     onChange={handleChange}
                     value={egreso.tipoDinero}
-                    disabled={modoSoloLectura}
+                    disabled={modoSoloLectura || egreso.tipoPago === "Tarjeta"}
                   >
                     <option value="Cordobas">Cordobas</option>
                     <option value="Dolares">Dolares</option>
