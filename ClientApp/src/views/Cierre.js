@@ -122,188 +122,75 @@ const Cierre = () => {
                     throw new Error('Error al obtener datos');
                 }
             } else {
-                // New logic for consolidated report
-                // For now, we'll simulate the API response since the backend might not be implemented yet
+                // New logic for consolidated report using real API calls
+                const tipoCambio = parseFloat(tipoCambioDolar);
+                
+                // Define the 4 combinations we need to fetch
+                const combinations = [
+                    { tipoPago: "Efectivo", tipoDinero: "Cordobas" },
+                    { tipoPago: "Efectivo", tipoDinero: "Dolares" },
+                    { tipoPago: "Transferencia", tipoDinero: "Cordobas" },
+                    { tipoPago: "Transferencia", tipoDinero: "Dolares" }
+                ];
+                
                 try {
-                    const url = `api/cierre/CalcularConsolidado?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&tipoCambioDolar=${tipoCambioDolar}`;
-                    
-                    const response = await fetch(url);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        setConsolidatedData(data);
-                        setCierreData(null);
-                        setIngresos([]);
-                        setEgresos([]);
-                        
-                        // Calculate overall totals
-                        let totalIngresosConsolidado = 0;
-                        let totalEgresosConsolidado = 0;
-                        
-                        data.resumenPorTipo.forEach(item => {
-                            totalIngresosConsolidado += item.totalIngresos;
-                            totalEgresosConsolidado += item.totalEgresos;
-                        });
-                        
-                        setTotalIngresos(totalIngresosConsolidado);
-                        setTotalEgresos(totalEgresosConsolidado);
-                        setSaldoCierre(totalIngresosConsolidado - totalEgresosConsolidado);
-                        setMonedaSimbolo("C$");
-                        
-                        if (data.resumenPorTipo.length === 0) {
-                            Swal.fire('Información', 'No se encontraron registros para los filtros seleccionados', 'info');
-                        }
-                    } else {
-                        throw new Error('API endpoint not implemented yet');
-                    }
-                } catch (error) {
-                    // Fallback to mock data for testing purposes
-                    console.log('Using mock data for consolidated report');
-                    
-                    const tipoCambio = parseFloat(tipoCambioDolar);
-                    
-                    // Mock data structure for testing with detailed transactions
-                    const mockData = {
-                        resumenPorTipo: [
-                            {
-                                tipoPago: "Efectivo",
-                                tipoMoneda: "Cordobas",
-                                totalIngresos: 124800.00, // 121900 + 2800 + 100
-                                totalEgresos: 800.00,
-                                saldoCierre: 124000.00, // 124800 - 800
-                                ingresos: [
-                                    {
-                                        descripcion: "Pago de venta #000003",
-                                        fechaRegistro: "09/09/2025 17:25",
-                                        monto: 121900.00,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "kenley"
-                                    },
-                                    {
-                                        descripcion: "Pago de venta #000002",
-                                        fechaRegistro: "09/09/2025 16:15",
-                                        monto: 2800.00,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "victor"
-                                    },
-                                    {
-                                        descripcion: "Pago de venta #000001",
-                                        fechaRegistro: "09/09/2025 14:30",
-                                        monto: 100.00,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "kenley"
-                                    }
-                                ],
-                                egresos: [
-                                    {
-                                        descripcion: "egreso efectivo cordobas",
-                                        fechaRegistro: "09/09/2025 12:00",
-                                        monto: 800.00,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "kenley"
-                                    }
-                                ]
-                            },
-                            {
-                                tipoPago: "Efectivo",
-                                tipoMoneda: "Dolares",
-                                totalIngresos: (500.00 + 300.00) * tipoCambio, // (800 * tipoCambio)
-                                totalEgresos: 200.00 * tipoCambio,
-                                saldoCierre: 600.00 * tipoCambio,
-                                ingresos: [
-                                    {
-                                        descripcion: "Pago de venta #000004",
-                                        fechaRegistro: "09/09/2025 15:45",
-                                        monto: 500.00 * tipoCambio,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "maria"
-                                    },
-                                    {
-                                        descripcion: "Pago de venta #000005",
-                                        fechaRegistro: "09/09/2025 13:20",
-                                        monto: 300.00 * tipoCambio,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "carlos"
-                                    }
-                                ],
-                                egresos: [
-                                    {
-                                        descripcion: "egreso efectivo dolares",
-                                        fechaRegistro: "09/09/2025 11:30",
-                                        monto: 200.00 * tipoCambio,
-                                        tipoPago: "Efectivo",
-                                        nombreUsuario: "ana"
-                                    }
-                                ]
-                            },
-                            {
-                                tipoPago: "Transferencia",
-                                tipoMoneda: "Cordobas",
-                                totalIngresos: 75000.00, // 45000 + 30000
-                                totalEgresos: 25000.00,
-                                saldoCierre: 50000.00,
-                                ingresos: [
-                                    {
-                                        descripcion: "Transferencia pago venta #000006",
-                                        fechaRegistro: "09/09/2025 16:00",
-                                        monto: 45000.00,
-                                        tipoPago: "Transferencia",
-                                        nombreUsuario: "luis"
-                                    },
-                                    {
-                                        descripcion: "Transferencia pago venta #000007",
-                                        fechaRegistro: "09/09/2025 14:45",
-                                        monto: 30000.00,
-                                        tipoPago: "Transferencia",
-                                        nombreUsuario: "sofia"
-                                    }
-                                ],
-                                egresos: [
-                                    {
-                                        descripcion: "egreso transferencia cordobas",
-                                        fechaRegistro: "09/09/2025 10:15",
-                                        monto: 25000.00,
-                                        tipoPago: "Transferencia",
-                                        nombreUsuario: "pedro"
-                                    }
-                                ]
-                            },
-                            {
-                                tipoPago: "Transferencia",
-                                tipoMoneda: "Dolares",
-                                totalIngresos: (700.00 + 500.00) * tipoCambio, // (1200 * tipoCambio)
-                                totalEgresos: 300.00 * tipoCambio,
-                                saldoCierre: 900.00 * tipoCambio,
-                                ingresos: [
-                                    {
-                                        descripcion: "Transferencia pago venta #000008",
-                                        fechaRegistro: "09/09/2025 17:10",
-                                        monto: 700.00 * tipoCambio,
-                                        tipoPago: "Transferencia",
-                                        nombreUsuario: "diego"
-                                    },
-                                    {
-                                        descripcion: "Transferencia pago venta #000009",
-                                        fechaRegistro: "09/09/2025 15:30",
-                                        monto: 500.00 * tipoCambio,
-                                        tipoPago: "Transferencia",
-                                        nombreUsuario: "elena"
-                                    }
-                                ],
-                                egresos: [
-                                    {
-                                        descripcion: "egreso transferencia dolares",
-                                        fechaRegistro: "09/09/2025 09:45",
-                                        monto: 300.00 * tipoCambio,
-                                        tipoPago: "Transferencia",
-                                        nombreUsuario: "miguel"
-                                    }
-                                ]
+                    // Make all 4 API calls in parallel
+                    const promises = combinations.map(combo => {
+                        const url = `api/cierre/Calcular?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&tipoPago=${combo.tipoPago}&tipoDinero=${combo.tipoDinero}`;
+                        return fetch(url).then(response => {
+                            if (response.ok) {
+                                return response.json().then(data => ({ ...data, ...combo }));
+                            } else {
+                                throw new Error(`Error fetching data for ${combo.tipoPago}-${combo.tipoDinero}`);
                             }
-                        ]
-                    };
+                        });
+                    });
                     
-                    setConsolidatedData(mockData);
+                    const results = await Promise.all(promises);
+                    
+                    // Process results and convert dollar amounts to córdobas
+                    const resumenPorTipo = results.map(result => {
+                        const isDolares = result.tipoDinero === "Dolares";
+                        
+                        // Convert amounts if in dollars
+                        const convertAmount = (amount) => isDolares ? parseFloat(amount) * tipoCambio : parseFloat(amount);
+                        
+                        // Convert individual transactions
+                        const ingresosConvertidos = result.ingresos.map(ingreso => ({
+                            descripcion: ingreso.descripcion,
+                            fechaRegistro: ingreso.fechaRegistro,
+                            monto: convertAmount(ingreso.monto),
+                            tipoPago: ingreso.tipoPago,
+                            nombreUsuario: ingreso.nombreUsuario
+                        }));
+                        
+                        const egresosConvertidos = result.egresos.map(egreso => ({
+                            descripcion: egreso.descripcion,
+                            fechaRegistro: egreso.fechaRegistro,
+                            monto: convertAmount(egreso.monto),
+                            tipoPago: egreso.tipoPago,
+                            nombreUsuario: egreso.nombreUsuario
+                        }));
+                        
+                        // Calculate totals in córdobas
+                        const totalIngresos = isDolares ? result.totalIngresos * tipoCambio : result.totalIngresos;
+                        const totalEgresos = isDolares ? result.totalEgresos * tipoCambio : result.totalEgresos;
+                        const saldoCierre = totalIngresos - totalEgresos;
+                        
+                        return {
+                            tipoPago: result.tipoPago,
+                            tipoMoneda: result.tipoDinero,
+                            totalIngresos,
+                            totalEgresos,
+                            saldoCierre,
+                            ingresos: ingresosConvertidos,
+                            egresos: egresosConvertidos
+                        };
+                    });
+                    
+                    const consolidatedData = { resumenPorTipo };
+                    
+                    setConsolidatedData(consolidatedData);
                     setCierreData(null);
                     setIngresos([]);
                     setEgresos([]);
@@ -312,7 +199,7 @@ const Cierre = () => {
                     let totalIngresosConsolidado = 0;
                     let totalEgresosConsolidado = 0;
                     
-                    mockData.resumenPorTipo.forEach(item => {
+                    consolidatedData.resumenPorTipo.forEach(item => {
                         totalIngresosConsolidado += item.totalIngresos;
                         totalEgresosConsolidado += item.totalEgresos;
                     });
@@ -321,6 +208,13 @@ const Cierre = () => {
                     setTotalEgresos(totalEgresosConsolidado);
                     setSaldoCierre(totalIngresosConsolidado - totalEgresosConsolidado);
                     setMonedaSimbolo("C$");
+                    
+                    if (consolidatedData.resumenPorTipo.every(item => item.ingresos.length === 0 && item.egresos.length === 0)) {
+                        Swal.fire('Información', 'No se encontraron registros para los filtros seleccionados', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error fetching consolidated data:', error);
+                    Swal.fire('Error', 'No se pudo obtener los datos del cierre consolidado', 'error');
                 }
             }
         } catch (error) {
