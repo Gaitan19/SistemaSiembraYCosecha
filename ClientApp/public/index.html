@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=yes, viewport-fit=cover">
   <meta name="description" content="Sistema de Siembras y Cosechas - Compatible con móviles, tablets y escritorio">
   <meta name="author" content="">
   
@@ -12,11 +12,18 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Siembras & Cosechas">
   <meta name="theme-color" content="#4e73df">
+  <meta name="msapplication-TileColor" content="#4e73df">
   
   <!-- Cross-browser compatibility and security -->
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
+  
+  <!-- Enhanced mobile compatibility -->
+  <meta name="HandheldFriendly" content="true">
+  <meta name="MobileOptimized" content="width">
+  <meta name="apple-touch-fullscreen" content="yes">
 
   <title>SIEMBRAS & COSECHAS</title>
 
@@ -32,14 +39,28 @@
     rel="stylesheet">
 
   <link href="%PUBLIC_URL%/css/sb-admin-2.min.css" rel="stylesheet" type="text/css" />
+  <link href="%PUBLIC_URL%/css/mobile-optimizations.css" rel="stylesheet" type="text/css" />
 
 
 </head>
 
 <body id="page-top">
   <noscript>
-    You need to enable JavaScript to run this app.
+    <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+      <h2>JavaScript es requerido</h2>
+      <p>Esta aplicación requiere JavaScript para funcionar correctamente.</p>
+      <p>Por favor, habilita JavaScript en tu navegador e intenta nuevamente.</p>
+    </div>
   </noscript>
+  
+  <!-- Loading indicator for mobile -->
+  <div id="loading-indicator" class="loading-indicator" style="display: block;">
+    <div style="text-align: center;">
+      <div style="border: 3px solid #f3f3f3; border-top: 3px solid #4e73df; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+      <p>Cargando...</p>
+    </div>
+  </div>
+  
   <div id="wrapper">
 
   </div>
@@ -55,6 +76,40 @@
   <script src="%PUBLIC_URL%/vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <script src="%PUBLIC_URL%/js/sb-admin-2.js"></script>
+  
+  <!-- Mobile optimizations and loading handler -->
+  <script>
+    // Hide loading indicator when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+      }, 2000);
+    });
+    
+    // Mobile-specific optimizations
+    if (window.innerWidth <= 768) {
+      // Prevent zoom on input focus for iOS
+      document.addEventListener('touchstart', function() {
+        var viewport = document.querySelector('meta[name=viewport]');
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+      }, { passive: true });
+      
+      document.addEventListener('touchend', function() {
+        setTimeout(function() {
+          var viewport = document.querySelector('meta[name=viewport]');
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=yes, viewport-fit=cover');
+        }, 500);
+      }, { passive: true });
+    }
+    
+    // Add loading animation CSS
+    var style = document.createElement('style');
+    style.innerHTML = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+  </script>
 </body>
 
 </html>

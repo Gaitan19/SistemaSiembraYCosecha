@@ -1,0 +1,97 @@
+/* Mobile Optimizations for Sistema de Siembras y Cosechas */
+
+/* Improved loading experience */
+#wrapper {
+  min-height: 100vh;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Loading indicator for slow connections */
+.loading-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile-specific optimizations */
+@media screen and (max-width: 768px) {
+  /* Ensure proper touch targets */
+  .btn, button, .form-control, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve text readability on mobile */
+  body {
+    font-size: 16px !important;
+    line-height: 1.5;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Better spacing for touch interactions */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Optimize navigation for mobile */
+  .navbar-nav .nav-link {
+    padding: 1rem 0.75rem;
+  }
+}
+
+/* Tablet optimizations */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  /* Optimize for tablet touch interactions */
+  .btn {
+    padding: 0.625rem 1.25rem;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure crisp rendering on high-DPI screens */
+  .card, .btn, .form-control {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fix for viewport height on mobile browsers */
+@supports (-webkit-touch-callout: none) {
+  .vh-100 {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Ensure proper scrolling on iOS */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for iOS Safari address bar behavior */
+@media screen and (max-width: 768px) {
+  .container-fluid, .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}

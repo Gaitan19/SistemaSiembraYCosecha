@@ -40,13 +40,23 @@ const Login = () => {
             body: JSON.stringify(request)
         })
         .then((response) => {
-            return response.ok ? response.json() : Promise.reject(response);
+            if (!response.ok) {
+                // Handle different HTTP status codes
+                if (response.status === 401) {
+                    throw new Error('Credenciales inválidas');
+                } else if (response.status === 500) {
+                    throw new Error('Error del servidor. Verifique su conexión.');
+                } else {
+                    throw new Error(`Error: ${response.status}`);
+                }
+            }
+            return response.json();
         })
         .then((dataJson) => {
             if (dataJson.idUsuario === 0) {
                 Swal.fire(
                     'Opps!',
-                    'No se encontro el usuario',
+                    'No se encontró el usuario',
                     'error'
                 )
             } else {
@@ -55,9 +65,18 @@ const Login = () => {
             }
 
         }).catch((error) => {
+            console.error('Login error:', error);
+            let errorMessage = 'No se pudo iniciar sesión';
+            
+            if (error.message.includes('servidor')) {
+                errorMessage = 'Error de conexión con el servidor. Verifique su internet.';
+            } else if (error.message.includes('Credenciales')) {
+                errorMessage = 'Email o contraseña incorrectos.';
+            }
+            
             Swal.fire(
-                'Opps!',
-                'No se pudo iniciar sessión',
+                'Error de Conexión',
+                errorMessage,
                 'error'
             )
         })
