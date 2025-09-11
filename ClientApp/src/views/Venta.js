@@ -35,7 +35,6 @@ const Venta = () => {
   const [productsCart, setProductsCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [tempProducts, setTempProducts] = useState([]);
-  const [alreadyProductos, setAlreadyProductos] = useState(false);
 
   // New fields for payment
   const [tipoPago, setTipoPago] = useState("Efectivo");
@@ -121,7 +120,7 @@ const Venta = () => {
       // For Cordobas and dollars, recalculate automatically
       calcularVuelto(montoPago);
     }
-  }, [tipoPago, tipoDinero, total, montoPago, calcularVuelto]);
+  }, [tipoPago, tipoDinero, total, montoPago, calcularVuelto, tipoCambio]);
 
   // Buscar productos para mostrar en la tabla
   const buscarProductos = (value) => {

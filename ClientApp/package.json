@@ -2,6 +2,7 @@
   "name": "reactventas",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.6.0",

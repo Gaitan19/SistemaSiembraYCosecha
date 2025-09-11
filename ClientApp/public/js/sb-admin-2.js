@@ -28,7 +28,7 @@
   });
 
 
-    $(document).on("mousewheel DOMMouseScroll wheel", "body.fixed-nav .sidebar", function () {
+    $(document).on("mousewheel DOMMouseScroll wheel", "body.fixed-nav .sidebar", function (e) {
 
         if ($(window).width() > 768) {
             var e0 = e.originalEvent,

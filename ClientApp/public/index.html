@@ -4,16 +4,26 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=yes, maximum-scale=5.0">
+  <meta name="description" content="Sistema de Siembra y Cosecha - Gestión agrícola">
+  <meta name="author" content="Sistema Siembra Cosecha">
+  
+  <!-- Mobile browser theme color -->
+  <meta name="theme-color" content="#4e73df">
+  <meta name="msapplication-navbutton-color" content="#4e73df">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <!-- Touch Icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Siembras & Cosechas">
+  
   <title>SIEMBRAS & COSECHAS</title>
 
   <base href="%PUBLIC_URL%/" />
 
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
   <link rel="shortcut icon" href="%PUBLIC_URL%/Batidos-logo.png">
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/Batidos-logo.png">
 
   <link href="%PUBLIC_URL%/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
 
@@ -22,7 +32,61 @@
     rel="stylesheet">
 
   <link href="%PUBLIC_URL%/css/sb-admin-2.min.css" rel="stylesheet" type="text/css" />
-
+  
+  <!-- Mobile specific styles -->
+  <style>
+    /* Mobile touch improvements */
+    * {
+      -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+      -webkit-touch-callout: none;
+    }
+    
+    /* Better mobile responsiveness */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed !important;
+        top: 0;
+        left: -14rem;
+        width: 14rem;
+        height: 100vh;
+        z-index: 1040;
+        transition: all 0.3s;
+      }
+      
+      .sidebar.toggled {
+        left: 0;
+      }
+      
+      #content-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+      
+      .topbar .nav-item .nav-link {
+        padding: 0.5rem;
+      }
+      
+      .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+    }
+    
+    /* Touch friendly buttons */
+    .btn, .nav-link, .dropdown-item {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    
+    /* Prevent text selection on UI elements */
+    .sidebar, .topbar, .btn {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
 
 </head>
 

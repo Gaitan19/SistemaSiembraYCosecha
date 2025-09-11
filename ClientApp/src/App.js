@@ -10,6 +10,47 @@ const App = () => {
     const { user, cerrarSession } = useContext(UserContext)
     const { limpiarPermisos, cargarPermisos, userPermissions } = usePermissions()
 
+    // Mobile sidebar overlay handler
+    useEffect(() => {
+        const handleSidebarToggle = () => {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar && window.innerWidth <= 768) {
+                if (sidebar.classList.contains('toggled')) {
+                    if (!overlay) {
+                        const newOverlay = document.createElement('div');
+                        newOverlay.className = 'sidebar-overlay';
+                        newOverlay.addEventListener('click', () => {
+                            sidebar.classList.remove('toggled');
+                            newOverlay.remove();
+                        });
+                        document.body.appendChild(newOverlay);
+                        setTimeout(() => newOverlay.classList.add('show'), 10);
+                    }
+                } else {
+                    if (overlay) {
+                        overlay.classList.remove('show');
+                        setTimeout(() => overlay.remove(), 300);
+                    }
+                }
+            }
+        };
+
+        // Listen for sidebar toggle events
+        const toggleButtons = document.querySelectorAll('#sidebarToggle, #sidebarToggleTop');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', handleSidebarToggle);
+        });
+
+        // Cleanup function
+        return () => {
+            toggleButtons.forEach(button => {
+                button.removeEventListener('click', handleSidebarToggle);
+            });
+        };
+    }, []);
+
     // Cargar permisos cuando el usuario existe (al inicializar o refrescar página)
     useEffect(() => {
         if (user) {
@@ -69,7 +110,7 @@ const App = () => {
                     <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
                     {/* Sidebar Toggle (Topbar) */}
-                    <button id="sidebarToggleTop" className="btn btn-link d-md-none rounded-circle mr-3">
+                    <button id="sidebarToggleTop" className="btn btn-link d-md-none rounded-circle mr-3" style={{minHeight: '44px', minWidth: '44px'}}>
                         <i className="fa fa-bars"></i>
                     </button>
 

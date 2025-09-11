@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import './mobile-polyfills.js'; // Mobile browser compatibility
+import './mobile-fixes.css'; // Mobile responsiveness fixes
+
 import App from './App';
 import Categoria from './views/Categoria';
 import DashBoard from './views/DashBoard';
