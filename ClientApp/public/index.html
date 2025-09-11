@@ -1,12 +1,22 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, shrink-to-fit=no, user-scalable=yes">
+  <meta name="description" content="Sistema de Siembras y Cosechas - Gestión de batidos y productos">
+  <meta name="author" content="Sistema Siembras & Cosechas">
+  
+  <!-- Mobile optimization meta tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Siembras & Cosechas">
+  <meta name="format-detection" content="telephone=no">
+  
+  <!-- Prevent zoom issues on mobile -->
+  <meta name="msapplication-tap-highlight" content="no">
 
   <title>SIEMBRAS & COSECHAS</title>
 
@@ -14,21 +24,57 @@
 
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
   <link rel="shortcut icon" href="%PUBLIC_URL%/Batidos-logo.png">
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/Batidos-logo.png">
+
+  <!-- Preload critical resources to improve loading -->
+  <link rel="preload" href="%PUBLIC_URL%/vendor/jquery/jquery.min.js" as="script">
+  <link rel="preload" href="%PUBLIC_URL%/vendor/bootstrap/js/bootstrap.bundle.min.js" as="script">
+  <link rel="preload" href="%PUBLIC_URL%/css/sb-admin-2.min.css" as="style">
 
   <link href="%PUBLIC_URL%/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
 
   <link
-    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-    rel="stylesheet">
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&display=swap"
+    rel="stylesheet" crossorigin="anonymous">
 
   <link href="%PUBLIC_URL%/css/sb-admin-2.min.css" rel="stylesheet" type="text/css" />
+
+  <style>
+    /* Prevent mobile layout issues */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      touch-action: manipulation;
+    }
+    
+    /* Loading state to prevent blank screens */
+    #wrapper:empty::before {
+      content: "Cargando...";
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      color: #858796;
+    }
+  </style>
 
 
 </head>
 
 <body id="page-top">
   <noscript>
-    You need to enable JavaScript to run this app.
+    <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+      <h2>JavaScript Requerido</h2>
+      <p>Necesita habilitar JavaScript para ejecutar esta aplicación.</p>
+      <p>You need to enable JavaScript to run this app.</p>
+    </div>
   </noscript>
   <div id="wrapper">
 
@@ -38,13 +84,36 @@
     <i class="fas fa-angle-up"></i>
   </a>
 
+  <!-- Error handling for script loading failures -->
+  <script>
+    // Handle resource loading errors and HTTP/2 protocol issues
+    window.addEventListener('error', function(e) {
+      console.warn('Resource loading error:', e.filename || e.target?.src || 'unknown');
+      
+      // If main scripts fail to load, try to reload once
+      if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
+        var retryCount = parseInt(sessionStorage.getItem('resourceRetryCount') || '0');
+        if (retryCount < 1) {
+          sessionStorage.setItem('resourceRetryCount', (retryCount + 1).toString());
+          setTimeout(() => {
+            console.log('Attempting to reload due to resource error...');
+            window.location.reload();
+          }, 1000);
+        }
+      }
+    });
 
+    // Clear retry count on successful load
+    window.addEventListener('load', function() {
+      sessionStorage.removeItem('resourceRetryCount');
+    });
+  </script>
 
-  <script src="%PUBLIC_URL%/vendor/jquery/jquery.min.js"></script>
-  <script src="%PUBLIC_URL%/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="%PUBLIC_URL%/vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="%PUBLIC_URL%/vendor/jquery/jquery.min.js" onerror="console.error('Failed to load jQuery')"></script>
+  <script src="%PUBLIC_URL%/vendor/bootstrap/js/bootstrap.bundle.min.js" onerror="console.error('Failed to load Bootstrap')"></script>
+  <script src="%PUBLIC_URL%/vendor/jquery-easing/jquery.easing.min.js" onerror="console.error('Failed to load jQuery Easing')"></script>
 
-  <script src="%PUBLIC_URL%/js/sb-admin-2.js"></script>
+  <script src="%PUBLIC_URL%/js/sb-admin-2.js" onerror="console.error('Failed to load SB Admin scripts')"></script>
 </body>
 
 </html>
