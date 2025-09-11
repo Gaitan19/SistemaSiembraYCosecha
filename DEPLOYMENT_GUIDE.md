@@ -4,12 +4,20 @@ Este documento explica cómo publicar el proyecto **Sistema de Siembra y Cosecha
 
 ## Problema Resuelto
 
+### Problema Original de FontAwesome
 El error original se debía a que FontAwesome incluía miles de archivos SVG (1612+ archivos) que causaban fallos en la subida FTP:
 ```
 Unable to add folder 'wwwroot/vendor/fontawesome-free/svgs/solid' to the Web site.
 ```
 
 **Solución implementada:** Se modificó el archivo `ReactVentas.csproj` para excluir automáticamente los directorios SVG durante el proceso de publicación, manteniendo solo los archivos CSS y webfonts necesarios.
+
+### ⚠️ PROBLEMA CRÍTICO: URL del Dominio
+**Error encontrado:** El dominio en Somee.com es `siembraCosecha.somee.com` (con "C" mayúscula), pero se está intentando acceder a `siembracosecha.somee.com` (todo en minúsculas).
+
+**Solución:** 
+1. Usar la URL correcta: `https://siembraCosecha.somee.com`
+2. Agregado `web.config` para manejo correcto de rutas SPA en IIS
 
 ## Pasos para el Despliegue
 
@@ -22,23 +30,32 @@ dotnet publish ReactVentas.csproj -c Release -o ./publish
 Después de la compilación, sube **SOLO** el contenido de la carpeta `./publish/` a tu servidor Somee.com:
 
 **Datos FTP:**
-- Servidor: `ftp://siembraycosecha.somee.com/www.SiembraYCosecha.somee.com`
-- Usuario: `vhromero` 
-- Contraseña: `RomeroEspinoza2024@`
+- Servidor: `ftp://siembraCosecha.somee.com/www.siembraCosecha.somee.com`
+- Usuario: `kenley1906` 
+- URL del sitio: `https://siembraCosecha.somee.com` (⚠️ **IMPORTANTE**: La "C" es mayúscula)
 
-### 3. Estructura de Archivos Optimizada
-Los archivos FontAwesome incluidos son:
+### 3. Archivos Críticos para IIS/Somee.com
+**Importante:** Los siguientes archivos son necesarios para el correcto funcionamiento:
+- ✅ `web.config` (configuración IIS para SPA routing)
+- ✅ `wwwroot/index.html` (página principal)
 - ✅ `wwwroot/vendor/fontawesome-free/css/` (archivos CSS)
 - ✅ `wwwroot/vendor/fontawesome-free/webfonts/` (fuentes web)
 - ❌ `svgs/` (excluidos automáticamente)
 
-### 4. Configuración de Base de Datos
+### 4. URL Correcta del Sitio
+⚠️ **MUY IMPORTANTE**: El dominio configurado en Somee.com es:
+```
+https://siembraCosecha.somee.com
+```
+Note que la "C" de "Cosecha" es **mayúscula**. Usar la URL incorrecta resultará en error 404.
+
+### 5. Configuración de Base de Datos
 El proyecto ya está configurado con la cadena de conexión de Somee.com:
 
 ```json
 {
   "ConnectionStrings": {
-    "cadenaSQL": "workstation id=DBREACT_VENTA.mssql.somee.com;packet size=4096;user id=vhromero_SQLLogin_1;pwd=m5zmtmub73;data source=DBREACT_VENTA.mssql.somee.com;persist security info=False;initial catalog=DBREACT_VENTA;TrustServerCertificate=True"
+    "cadenaSQL": "workstation id=DBSiembraReact_VENTA.mssql.somee.com;packet size=4096;user id=kenley1906_SQLLogin_1;pwd=dtyxwpwfps;data source=DBSiembraReact_VENTA.mssql.somee.com;persist security info=False;initial catalog=DBSiembraReact_VENTA;TrustServerCertificate=True"
   }
 }
 ```
@@ -80,6 +97,11 @@ El proyecto ya está configurado con la cadena de conexión de Somee.com:
 ## Troubleshooting
 
 Si experimentas problemas:
+
+### Error 404 - "Página no encontrada"
+⚠️ **Causa más común**: URL incorrecta
+- ❌ Incorrecto: `https://siembracosecha.somee.com`
+- ✅ Correcto: `https://siembraCosecha.somee.com` (note la "C" mayúscula)
 
 ### Problemas de Conectividad/API
 1. **Error 500 en login**: Verifica que la cadena de conexión de base de datos esté configurada correctamente

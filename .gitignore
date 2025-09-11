@@ -140,6 +140,9 @@ publish/
 *.pubxml
 *.publishproj
 
+# Test publish outputs
+test-publish/
+
 # NuGet Packages
 *.nupkg
 # The packages folder can be ignored because of Package Restore
