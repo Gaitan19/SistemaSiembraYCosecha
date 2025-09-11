@@ -8,6 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add CORS policy for cross-origin requests (mobile apps, different browsers, etc.)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 builder.Services.AddDbContext<DBREACT_VENTAContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("cadenaSQL"));
 });
@@ -46,6 +57,8 @@ else
     app.UseHsts();
 }
 
+// Enable CORS for cross-platform and cross-browser access
+app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
