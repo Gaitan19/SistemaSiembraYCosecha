@@ -42,8 +42,19 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error");
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+    });
+    app.UseCors("AllowAll");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
 
