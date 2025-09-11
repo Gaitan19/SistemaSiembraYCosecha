@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { usePermissions } from "../context/PermissionProvider";
-import { FaTools } from "react-icons/fa";
 const NavBar = () => {
   const { tienePermiso } = usePermissions();
   return (

@@ -28,6 +28,10 @@
     <Content Remove="$(SpaRoot)**" />
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+    
+    <!-- Exclude FontAwesome SVG directories to prevent FTP upload issues during deployment -->
+    <Content Remove="$(SpaRoot)public\vendor\fontawesome-free\svgs\**" />
+    <None Remove="$(SpaRoot)public\vendor\fontawesome-free\svgs\**" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
@@ -48,11 +52,28 @@
     <!-- Include the newly-built files in the publish output -->
     <ItemGroup>
       <DistFiles Include="$(SpaRoot)build\**" />
+      <!-- Exclude FontAwesome SVG files to prevent FTP upload issues -->
+      <DistFiles Remove="$(SpaRoot)build\static\media\**\*.svg" />
+      <DistFiles Remove="$(SpaRoot)build\**\fontawesome-free\svgs\**" />
       <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
         <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </ResolvedFileToPublish>
+    </ItemGroup>
+    
+    <!-- Remove FontAwesome SVG directories from publish output -->
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy(%(RelativePath)).Contains('fontawesome-free\svgs\'))" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Additional target to exclude FontAwesome SVGs from static file publishing -->
+  <Target Name="ExcludeFontAwesomeSVGs" BeforeTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <Content Remove="$(SpaRoot)public\vendor\fontawesome-free\svgs\**\*.*" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy(%(RelativePath)).Contains('fontawesome-free/svgs/'))" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy(%(RelativePath)).Contains('fontawesome-free\svgs\'))" />
     </ItemGroup>
   </Target>
 </Project>

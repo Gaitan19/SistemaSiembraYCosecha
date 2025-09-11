@@ -1,4 +1,4 @@
-﻿import { Card, CardBody, CardHeader, Col, FormGroup, Input, InputGroup, InputGroupText, Label, Row, Table, Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+﻿import { Card, CardBody, CardHeader, Col, FormGroup, Label, Row, Button } from "reactstrap";
 import DatePicker from "react-datepicker";
 import Swal from 'sweetalert2'
 import DataTable from 'react-data-table-component';
@@ -34,7 +34,7 @@ const ReporteVenta = () => {
         let _fechaInicio = fechaInicio.toLocaleDateString('es-PE', options)
         let _fechaFin = fechaFin.toLocaleDateString('es-PE', options)
 
-        const api = fetch(`api/venta/Reporte?fechaInicio=${_fechaInicio}&fechaFin=${_fechaFin}`)
+        fetch(`api/venta/Reporte?fechaInicio=${_fechaInicio}&fechaFin=${_fechaFin}`)
             .then((response) => {
                 return response.ok ? response.json() : Promise.reject(response);
             })
