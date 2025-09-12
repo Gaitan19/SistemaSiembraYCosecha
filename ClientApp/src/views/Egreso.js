@@ -40,6 +40,8 @@ const Egreso = () => {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [verModal, setVerModal] = useState(false);
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
+  const [modoEdicionDescripcion, setModoEdicionDescripcion] = useState(false);
+
 
   const handleChange = (e) => {
   let { name, value } = e.target;
@@ -162,6 +164,7 @@ const Egreso = () => {
       fechaRegistro: data.fechaRegistro
     });
     setModoSoloLectura(false);
+    setModoEdicionDescripcion(true);
     setVerModal(!verModal);
   };
 
@@ -171,19 +174,72 @@ const Egreso = () => {
       monto: parseFloat(data.monto) || 0
     });
     setModoSoloLectura(true);
+    setModoEdicionDescripcion(false);
     setVerModal(!verModal);
   };
 
   const cerrarModal = () => {
     setEgreso(modeloEgreso);
     setModoSoloLectura(false);
+    setModoEdicionDescripcion(false);
     setVerModal(!verModal);
+  };
+
+  const validarSaldoDisponible = async (tipoPago, tipoDinero, montoNuevoEgreso) => {
+    try {
+      const response = await fetch(`api/cierre/ResumenActual?tipoPago=${tipoPago}&tipoDinero=${tipoDinero}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+
+        
+        // Handle potential null/undefined values and ensure proper parsing
+        
+        const monedaSimbolo = data.MonedaSimbolo || (tipoDinero === "Dolares" ? "$" : "C$");
+        const saldoDisponible = data.saldoActual;
+        
+        return {
+          esValido: saldoDisponible >= montoNuevoEgreso,
+          monedaSimbolo: monedaSimbolo,
+          saldoDisponible: parseFloat(saldoDisponible).toFixed(2)
+        };
+      } else {
+        throw new Error('Error al obtener el resumen actual');
+      }
+    } catch (error) {
+      console.error('Error en validación de saldo:', error);
+      throw error;
+    }
   };
 
   const guardarCambios = async () => {
     try {
       // Get current user data
       const userData = JSON.parse(user);
+      
+      // For new expenses (not edits), validate available balance
+      if (egreso.idEgreso === 0) {
+        try {
+          // Ensure the amount is a valid number
+          const montoNumerico = parseFloat(egreso.monto) || 0;
+          
+          const validacion = await validarSaldoDisponible(egreso.tipoPago, egreso.tipoDinero, montoNumerico);
+          
+          if (!validacion.esValido) {
+            Swal.fire({
+              title: "Saldo insuficiente",
+              text: `No se puede agregar el egreso. El saldo disponible para ${egreso.tipoPago} en ${egreso.tipoDinero} es ${validacion.monedaSimbolo}${validacion.saldoDisponible}, pero está intentando egresar ${validacion.monedaSimbolo}${montoNumerico.toFixed(2)}.`,
+              icon: "error",
+              confirmButtonText: "Entendido"
+            });
+            return; // Exit without saving
+          }
+
+        } catch (error) {
+          Swal.fire("Error", "No se pudo validar el saldo disponible. Intente nuevamente.", "error");
+          return; // Exit without saving
+        }
+      }
       
       // Prepare data for sending with PascalCase property names for backend
       const egresoParaEnviar = {
@@ -350,13 +406,7 @@ const Egreso = () => {
             <i className="fas fa-pen-alt"></i>
           </Button>
 
-          <Button
-            color="danger"
-            size="sm"
-            onClick={() => eliminarEgreso(row.idEgreso)}
-          >
-            <i className="fas fa-trash-alt"></i>
-          </Button>
+          
         </>
       ),
     },
@@ -397,7 +447,10 @@ const Egreso = () => {
                   <Button
                     color="success"
                     size="sm"
-                    onClick={() => setVerModal(!verModal)}
+                    onClick={() => {
+                      setVerModal(!verModal)
+                      setModoEdicionDescripcion(false)
+                    }}
                   >
                     <i className="fas fa-plus-circle mr-2"></i>
                     Nuevo Egreso
@@ -407,22 +460,7 @@ const Egreso = () => {
             </CardHeader>
             <CardBody>
               <Row className="mb-3">
-                <Col sm="2" className="mb-3 my-sm-0">
-                  <Input
-                    type="select"
-                    value={statusFilter}
-                    onChange={handleStatusFilter}
-                    bsSize="sm"
-                    style={{
-                      border: '2px solid #4e73df',
-                      borderRadius: '5px'
-                    }}
-                  >
-                    <option value="todos">Todos</option>
-                    <option value="activos">Activos</option>
-                    <option value="inactivos">Inactivos</option>
-                  </Input>
-                </Col>
+                
                 <Col sm="3" className="mb-3 my-sm-0">
                   <Input
                     type="text"
@@ -500,7 +538,7 @@ const Egreso = () => {
                     step="0.01"
                     min="0"
                     required
-                    readOnly={modoSoloLectura}
+                    readOnly={modoSoloLectura || modoEdicionDescripcion}
                   />
                 </FormGroup>
               </Col>
@@ -513,7 +551,7 @@ const Egreso = () => {
                     name="tipoPago"
                     onChange={handleChange}
                     value={egreso.tipoPago}
-                    disabled={modoSoloLectura}
+                    disabled={modoSoloLectura || modoEdicionDescripcion}
                   >
                     <option value="Efectivo">Efectivo</option>
                     <option value="Transferencia">Transferencia</option>
@@ -532,7 +570,7 @@ const Egreso = () => {
                     name="tipoDinero"
                     onChange={handleChange}
                     value={egreso.tipoDinero}
-                    disabled={modoSoloLectura || egreso.tipoPago === "Tarjeta"}
+                    disabled={modoSoloLectura || egreso.tipoPago === "Tarjeta" || modoEdicionDescripcion}
                   >
                     <option value="Cordobas">Cordobas</option>
                     <option value="Dolares">Dolares</option>
@@ -559,7 +597,7 @@ const Egreso = () => {
                         });
                       }}
                       value={egreso.esActivo ? "true" : "false"}
-                      disabled={modoSoloLectura}
+                      disabled={modoSoloLectura || modoEdicionDescripcion}
                     >
                       <option value="true">Activo</option>
                       <option value="false">Inactivo</option>
@@ -586,7 +624,7 @@ const Egreso = () => {
                         });
                       }}
                       value={egreso.esActivo ? "true" : "false"}
-                      disabled={modoSoloLectura}
+                      disabled={modoSoloLectura || modoEdicionDescripcion}
                     >
                       <option value="true">Activo</option>
                       <option value="false">Inactivo</option>

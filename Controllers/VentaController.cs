@@ -140,7 +140,6 @@ namespace ReactVentas.Controllers
                         {
                             FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
                             HoraRegistro = v.FechaRegistro.Value.ToString("HH:mm:ss"),
-
                             NumeroDocumento = v.NumeroDocumento,
                             DocumentoCliente = v.DocumentoCliente,
                             NumeroRuc = v.NumeroRuc,
@@ -176,6 +175,7 @@ namespace ReactVentas.Controllers
                             FechaRegistro = v.FechaRegistro.Value.ToString("dd/MM/yyyy"),
                             HoraRegistro = v.FechaRegistro.Value.ToString("HH:mm:ss"),
                             NumeroDocumento = v.NumeroDocumento,
+                            NumeroRuc = v.NumeroRuc,
                             DocumentoCliente = v.DocumentoCliente,
                             NombreCliente = v.NombreCliente,
                             UsuarioRegistro = v.IdUsuarioNavigation.Nombre,
