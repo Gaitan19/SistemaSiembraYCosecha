@@ -191,17 +191,17 @@ const Egreso = () => {
       
       if (response.ok) {
         const data = await response.json();
+
         
         // Handle potential null/undefined values and ensure proper parsing
-        const totalIngresos = parseFloat(data.TotalIngresos || "0") || 0;
-        const totalEgresos = parseFloat(data.TotalEgresos || "0") || 0;
-        const saldoDisponible = totalIngresos - totalEgresos;
+        
         const monedaSimbolo = data.MonedaSimbolo || (tipoDinero === "Dolares" ? "$" : "C$");
+        const saldoDisponible = data.saldoActual;
         
         return {
           esValido: saldoDisponible >= montoNuevoEgreso,
-          saldoDisponible: saldoDisponible,
-          monedaSimbolo: monedaSimbolo
+          monedaSimbolo: monedaSimbolo,
+          saldoDisponible: parseFloat(saldoDisponible).toFixed(2)
         };
       } else {
         throw new Error('Error al obtener el resumen actual');
@@ -228,12 +228,13 @@ const Egreso = () => {
           if (!validacion.esValido) {
             Swal.fire({
               title: "Saldo insuficiente",
-              text: `No se puede agregar el egreso. El saldo disponible para ${egreso.tipoPago} en ${egreso.tipoDinero} es ${validacion.monedaSimbolo}${validacion.saldoDisponible.toFixed(2)}, pero está intentando egresar ${validacion.monedaSimbolo}${montoNumerico.toFixed(2)}.`,
+              text: `No se puede agregar el egreso. El saldo disponible para ${egreso.tipoPago} en ${egreso.tipoDinero} es ${validacion.monedaSimbolo}${validacion.saldoDisponible}, pero está intentando egresar ${validacion.monedaSimbolo}${montoNumerico.toFixed(2)}.`,
               icon: "error",
               confirmButtonText: "Entendido"
             });
             return; // Exit without saving
           }
+
         } catch (error) {
           Swal.fire("Error", "No se pudo validar el saldo disponible. Intente nuevamente.", "error");
           return; // Exit without saving
