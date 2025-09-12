@@ -185,10 +185,61 @@ const Egreso = () => {
     setVerModal(!verModal);
   };
 
+  const validarSaldoDisponible = async (tipoPago, tipoDinero, montoNuevoEgreso) => {
+    try {
+      const response = await fetch(`api/cierre/ResumenActual?tipoPago=${tipoPago}&tipoDinero=${tipoDinero}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+
+        
+        // Handle potential null/undefined values and ensure proper parsing
+        
+        const monedaSimbolo = data.MonedaSimbolo || (tipoDinero === "Dolares" ? "$" : "C$");
+        const saldoDisponible = data.saldoActual;
+        
+        return {
+          esValido: saldoDisponible >= montoNuevoEgreso,
+          monedaSimbolo: monedaSimbolo,
+          saldoDisponible: parseFloat(saldoDisponible).toFixed(2)
+        };
+      } else {
+        throw new Error('Error al obtener el resumen actual');
+      }
+    } catch (error) {
+      console.error('Error en validación de saldo:', error);
+      throw error;
+    }
+  };
+
   const guardarCambios = async () => {
     try {
       // Get current user data
       const userData = JSON.parse(user);
+      
+      // For new expenses (not edits), validate available balance
+      if (egreso.idEgreso === 0) {
+        try {
+          // Ensure the amount is a valid number
+          const montoNumerico = parseFloat(egreso.monto) || 0;
+          
+          const validacion = await validarSaldoDisponible(egreso.tipoPago, egreso.tipoDinero, montoNumerico);
+          
+          if (!validacion.esValido) {
+            Swal.fire({
+              title: "Saldo insuficiente",
+              text: `No se puede agregar el egreso. El saldo disponible para ${egreso.tipoPago} en ${egreso.tipoDinero} es ${validacion.monedaSimbolo}${validacion.saldoDisponible}, pero está intentando egresar ${validacion.monedaSimbolo}${montoNumerico.toFixed(2)}.`,
+              icon: "error",
+              confirmButtonText: "Entendido"
+            });
+            return; // Exit without saving
+          }
+
+        } catch (error) {
+          Swal.fire("Error", "No se pudo validar el saldo disponible. Intente nuevamente.", "error");
+          return; // Exit without saving
+        }
+      }
       
       // Prepare data for sending with PascalCase property names for backend
       const egresoParaEnviar = {
