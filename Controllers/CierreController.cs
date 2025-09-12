@@ -21,6 +21,53 @@ namespace ReactVentas.Controllers
         }
 
         [HttpGet]
+        [Route("ResumenActual")]
+        public async Task<IActionResult> CalcularResumenActual(
+            [FromQuery] string tipoPago,
+            [FromQuery] string tipoDinero)
+        {
+            try
+            {
+                var ingresoContext = _ingresoRepository.GetContext();
+                var egresoContext = _egresoRepository.GetContext();
+
+                // Filtrar ingresos activos por tipo de pago y tipo de dinero
+                var ingresosQuery = from i in ingresoContext.Ingresos
+                                    where i.EsActivo == true &&
+                                          i.TipoPago == tipoPago &&
+                                          i.TipoDinero == tipoDinero
+                                    select i.Monto ?? 0;
+
+                // Filtrar egresos activos por tipo de pago y tipo de dinero
+                var egresosQuery = from e in egresoContext.Egresos
+                                   where e.EsActivo == true &&
+                                         e.TipoPago == tipoPago &&
+                                         e.TipoDinero == tipoDinero
+                                   select e.Monto ?? 0;
+
+                var totalIngresos = await ingresosQuery.SumAsync();
+                var totalEgresos = await egresosQuery.SumAsync();
+                var saldoActual = totalIngresos - totalEgresos;
+
+                var monedaSimbolo = tipoDinero == "Dolares" ? "$" : "C$";
+
+                var resultado = new
+                {
+                    TotalIngresos = totalIngresos.ToString("F2"),
+                    TotalEgresos = totalEgresos.ToString("F2"),
+                    SaldoActual = saldoActual.ToString("F2"),
+                    MonedaSimbolo = monedaSimbolo
+                };
+
+                return StatusCode(StatusCodes.Status200OK, resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
         [Route("Calcular")]
         public async Task<IActionResult> CalcularCierre(
             [FromQuery] string fechaInicio,
@@ -46,43 +93,43 @@ namespace ReactVentas.Controllers
 
                 // Query filtered Ingresos
                 var ingresosQuery = from i in ingresoContext.Ingresos
-                                   join u in ingresoContext.Usuarios on i.IdUsuario equals u.IdUsuario
-                                   where i.EsActivo == true &&
-                                         i.FechaRegistro >= startDate &&
-                                         i.FechaRegistro <= endDate &&
-                                         i.TipoPago == tipoPago &&
-                                         i.TipoDinero == tipoDinero
-                                   orderby i.FechaRegistro descending
-                                   select new DtoIngresoFiltrado
-                                   {
-                                       IdIngreso = i.IdIngreso,
-                                       Descripcion = i.Descripcion ?? "",
-                                       FechaRegistro = i.FechaRegistro.HasValue ? i.FechaRegistro.Value.ToString("dd/MM/yyyy HH:mm") : "",
-                                       Monto = i.Monto.HasValue ? i.Monto.Value.ToString("F2") : "0.00",
-                                       TipoPago = i.TipoPago ?? "",
-                                       TipoDinero = i.TipoDinero ?? "",
-                                       NombreUsuario = u.Nombre ?? ""
-                                   };
+                                    join u in ingresoContext.Usuarios on i.IdUsuario equals u.IdUsuario
+                                    where i.EsActivo == true &&
+                                          i.FechaRegistro >= startDate &&
+                                          i.FechaRegistro <= endDate &&
+                                          i.TipoPago == tipoPago &&
+                                          i.TipoDinero == tipoDinero
+                                    orderby i.FechaRegistro descending
+                                    select new DtoIngresoFiltrado
+                                    {
+                                        IdIngreso = i.IdIngreso,
+                                        Descripcion = i.Descripcion ?? "",
+                                        FechaRegistro = i.FechaRegistro.HasValue ? i.FechaRegistro.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                                        Monto = i.Monto.HasValue ? i.Monto.Value.ToString("F2") : "0.00",
+                                        TipoPago = i.TipoPago ?? "",
+                                        TipoDinero = i.TipoDinero ?? "",
+                                        NombreUsuario = u.Nombre ?? ""
+                                    };
 
                 // Query filtered Egresos
                 var egresosQuery = from e in egresoContext.Egresos
-                                  join u in egresoContext.Usuarios on e.IdUsuario equals u.IdUsuario
-                                  where e.EsActivo == true &&
-                                        e.FechaRegistro >= startDate &&
-                                        e.FechaRegistro <= endDate &&
-                                        e.TipoPago == tipoPago &&
-                                        e.TipoDinero == tipoDinero
-                                  orderby e.FechaRegistro descending
-                                  select new DtoEgresoFiltrado
-                                  {
-                                      IdEgreso = e.IdEgreso,
-                                      Descripcion = e.Descripcion ?? "",
-                                      FechaRegistro = e.FechaRegistro.HasValue ? e.FechaRegistro.Value.ToString("dd/MM/yyyy HH:mm") : "",
-                                      Monto = e.Monto.HasValue ? e.Monto.Value.ToString("F2") : "0.00",
-                                      TipoPago = e.TipoPago ?? "",
-                                      TipoDinero = e.TipoDinero ?? "",
-                                      NombreUsuario = u.Nombre ?? ""
-                                  };
+                                   join u in egresoContext.Usuarios on e.IdUsuario equals u.IdUsuario
+                                   where e.EsActivo == true &&
+                                         e.FechaRegistro >= startDate &&
+                                         e.FechaRegistro <= endDate &&
+                                         e.TipoPago == tipoPago &&
+                                         e.TipoDinero == tipoDinero
+                                   orderby e.FechaRegistro descending
+                                   select new DtoEgresoFiltrado
+                                   {
+                                       IdEgreso = e.IdEgreso,
+                                       Descripcion = e.Descripcion ?? "",
+                                       FechaRegistro = e.FechaRegistro.HasValue ? e.FechaRegistro.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                                       Monto = e.Monto.HasValue ? e.Monto.Value.ToString("F2") : "0.00",
+                                       TipoPago = e.TipoPago ?? "",
+                                       TipoDinero = e.TipoDinero ?? "",
+                                       NombreUsuario = u.Nombre ?? ""
+                                   };
 
                 // Execute queries
                 var ingresos = await ingresosQuery.ToListAsync();
