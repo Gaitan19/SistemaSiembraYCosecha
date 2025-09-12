@@ -83,7 +83,7 @@ namespace ReactVentas.Controllers
                                        join d in _context.DetalleVenta on p.IdProducto equals d.IdProducto
                                        join v in _context.Venta on d.IdVenta equals v.IdVenta
                                        where v.FechaRegistro >= fecha && v.FechaRegistro <= fecha2
-                                       group p by p.Descripcion into g
+                                       group p by p.Nombre into g
                                        select new 
                                        {
                                            Producto = g.Key,
