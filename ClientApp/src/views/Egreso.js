@@ -191,14 +191,17 @@ const Egreso = () => {
       
       if (response.ok) {
         const data = await response.json();
-        const totalIngresos = parseFloat(data.TotalIngresos);
-        const totalEgresos = parseFloat(data.TotalEgresos);
+        
+        // Handle potential null/undefined values and ensure proper parsing
+        const totalIngresos = parseFloat(data.TotalIngresos || "0") || 0;
+        const totalEgresos = parseFloat(data.TotalEgresos || "0") || 0;
         const saldoDisponible = totalIngresos - totalEgresos;
+        const monedaSimbolo = data.MonedaSimbolo || (tipoDinero === "Dolares" ? "$" : "C$");
         
         return {
           esValido: saldoDisponible >= montoNuevoEgreso,
           saldoDisponible: saldoDisponible,
-          monedaSimbolo: data.MonedaSimbolo
+          monedaSimbolo: monedaSimbolo
         };
       } else {
         throw new Error('Error al obtener el resumen actual');
@@ -217,12 +220,15 @@ const Egreso = () => {
       // For new expenses (not edits), validate available balance
       if (egreso.idEgreso === 0) {
         try {
-          const validacion = await validarSaldoDisponible(egreso.tipoPago, egreso.tipoDinero, egreso.monto);
+          // Ensure the amount is a valid number
+          const montoNumerico = parseFloat(egreso.monto) || 0;
+          
+          const validacion = await validarSaldoDisponible(egreso.tipoPago, egreso.tipoDinero, montoNumerico);
           
           if (!validacion.esValido) {
             Swal.fire({
               title: "Saldo insuficiente",
-              text: `No se puede agregar el egreso. El saldo disponible para ${egreso.tipoPago} en ${egreso.tipoDinero} es ${validacion.monedaSimbolo}${validacion.saldoDisponible.toFixed(2)}, pero está intentando egresar ${validacion.monedaSimbolo}${egreso.monto.toFixed(2)}.`,
+              text: `No se puede agregar el egreso. El saldo disponible para ${egreso.tipoPago} en ${egreso.tipoDinero} es ${validacion.monedaSimbolo}${validacion.saldoDisponible.toFixed(2)}, pero está intentando egresar ${validacion.monedaSimbolo}${montoNumerico.toFixed(2)}.`,
               icon: "error",
               confirmButtonText: "Entendido"
             });
