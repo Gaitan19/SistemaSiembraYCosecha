@@ -1,8 +1,11 @@
-# Handle HTTP/2 protocol issues and hosting conflicts
+# Handle HTTP/2 protocol issues and hosting conflicts for somee.com
 <IfModule mod_headers.c>
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Force HTTP/1.1 to avoid HTTP/2 protocol errors on somee.com
+    Header always set Connection "HTTP/1.1"
+    Header always unset Upgrade
     # Prevent hosting provider iframe conflicts
     Header always set Content-Security-Policy "frame-src 'self' https:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;"
 </IfModule>

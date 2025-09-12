@@ -119,13 +119,25 @@
     </div>
   </noscript>
   
-  <!-- Mobile fallback for hosting conflicts -->
+  <!-- Mobile fallback for hosting conflicts and HTTP/2 errors -->
   <div class="mobile-fallback" id="mobile-fallback">
     <h2>Sistema de Siembras y Cosechas</h2>
-    <p>Detectamos posibles conflictos con el proveedor de hosting.</p>
-    <p>Por favor, actualice la página o intente acceder desde un navegador diferente.</p>
-    <button onclick="window.location.reload()" style="padding: 10px 20px; background: #4e73df; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">
-      Recargar Página
+    <p><strong>Detectamos problemas de conectividad</strong></p>
+    <p>Esto puede deberse a conflictos con el proveedor de hosting o errores de protocolo HTTP/2.</p>
+    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #dc3545; border-radius: 4px;">
+      <strong>Soluciones recomendadas:</strong>
+      <ul style="text-align: left; margin: 10px 0;">
+        <li>Recargue la página (botón abajo)</li>
+        <li>Cierre y abra la aplicación nuevamente</li>
+        <li>Pruebe con otro navegador móvil</li>
+        <li>Verifique su conexión a internet</li>
+      </ul>
+    </div>
+    <button onclick="window.location.reload(true)" style="padding: 12px 24px; background: #4e73df; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px; font-size: 16px;">
+      🔄 Recargar Página
+    </button>
+    <button onclick="window.location.href = window.location.href + '?v=' + Date.now()" style="padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px; font-size: 16px;">
+      🔗 Nueva Conexión
     </button>
   </div>
   
@@ -137,12 +149,18 @@
     <i class="fas fa-angle-up"></i>
   </a>
 
-  <!-- Error handling for script loading failures and hosting conflicts -->
+  <!-- Advanced error handling for HTTP/2 protocol errors and hosting conflicts -->
   <script>
     // Mobile device detection
     function isMobileDevice() {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
              (window.innerWidth <= 768);
+    }
+    
+    // Detect somee.com hosting environment
+    function isSomeeHosting() {
+      return window.location.hostname.includes('somee.com') || 
+             document.querySelector('script[src*="simulator"]') !== null;
     }
     
     // Hosting provider conflict detection
@@ -152,6 +170,92 @@
       return hostingScripts.length > 0;
     }
     
+    // Aggressive HTTP/2 protocol error detection and handling
+    function setupHTTP2ErrorDetection() {
+      // Check if we're on somee.com and mobile
+      if (isSomeeHosting() && isMobileDevice()) {
+        // Implement more aggressive error monitoring
+        console.log('Setting up enhanced HTTP/2 error detection for somee.com mobile');
+        
+        // Monitor network errors through performance API
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+          return originalFetch.apply(this, args)
+            .catch(error => {
+              console.warn('Fetch error detected:', error.message);
+              if (error.message.includes('HTTP2_PROTOCOL_ERROR') || 
+                  error.message.includes('net::ERR_HTTP2_PROTOCOL_ERROR')) {
+                handleHTTP2Error();
+              }
+              throw error;
+            });
+        };
+        
+        // Monitor XMLHttpRequest errors
+        const originalXHROpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url, ...args) {
+          this.addEventListener('error', function(e) {
+            console.warn('XHR error detected for:', url);
+            // Detect potential HTTP/2 errors
+            if (this.status === 0 || this.readyState === 0) {
+              handleHTTP2Error();
+            }
+          });
+          return originalXHROpen.call(this, method, url, ...args);
+        };
+      }
+    }
+    
+    // Handle HTTP/2 protocol errors with progressive strategy
+    function handleHTTP2Error() {
+      var retryCount = parseInt(sessionStorage.getItem('http2RetryCount') || '0');
+      console.log('Handling HTTP/2 protocol error, retry count:', retryCount);
+      
+      if (retryCount < 3) { // Allow more retries for persistent issues
+        sessionStorage.setItem('http2RetryCount', (retryCount + 1).toString());
+        
+        // Progressive retry strategy
+        const delay = retryCount === 0 ? 2000 : retryCount === 1 ? 5000 : 10000;
+        
+        setTimeout(() => {
+          console.log('Reloading due to HTTP/2 protocol error... attempt', retryCount + 1);
+          
+          if (isMobileDevice()) {
+            // For mobile on somee.com, try different reload strategies
+            if (retryCount === 0) {
+              // First attempt: force reload with cache bypass
+              window.location.reload(true);
+            } else if (retryCount === 1) {
+              // Second attempt: redirect to same URL to reset connection
+              window.location.href = window.location.href + '?v=' + Date.now();
+            } else {
+              // Third attempt: show fallback UI
+              showMobileFallback();
+            }
+          } else {
+            window.location.reload(true);
+          }
+        }, delay);
+      } else {
+        // After multiple failures, show fallback
+        showMobileFallback();
+      }
+    }
+    
+    // Show mobile fallback UI
+    function showMobileFallback() {
+      console.log('Showing mobile fallback UI');
+      const fallback = document.getElementById('mobile-fallback');
+      if (fallback) {
+        fallback.style.display = 'block';
+        // Hide the main wrapper to prevent confusion
+        const wrapper = document.getElementById('wrapper');
+        if (wrapper) {
+          wrapper.style.display = 'none';
+        }
+      }
+    }
+    
     // Enhanced error handling for hosting conflicts
     window.addEventListener('error', function(e) {
       console.warn('Resource loading error:', e.filename || e.target?.src || 'unknown');
@@ -159,47 +263,42 @@
       // Special handling for mobile devices and hosting conflicts
       if (isMobileDevice() && detectHostingConflict()) {
         console.warn('Detected hosting provider conflict on mobile device');
-        const fallback = document.getElementById('mobile-fallback');
-        if (fallback) {
-          fallback.style.display = 'block';
-        }
+        showMobileFallback();
       }
       
-      // If main scripts fail to load, try to reload once
+      // If main scripts fail to load, try to reload
       if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
         var retryCount = parseInt(sessionStorage.getItem('resourceRetryCount') || '0');
-        if (retryCount < 2) { // Allow more retries for hosting issues
+        if (retryCount < 2) {
           sessionStorage.setItem('resourceRetryCount', (retryCount + 1).toString());
           setTimeout(() => {
             console.log('Attempting to reload due to resource error...', retryCount + 1);
-            if (isMobileDevice()) {
-              // For mobile, try a more aggressive reload
-              window.location.href = window.location.href;
+            if (isMobileDevice() && isSomeeHosting()) {
+              // For somee.com mobile, handle more aggressively
+              handleHTTP2Error();
             } else {
               window.location.reload(true);
             }
-          }, 2000 * (retryCount + 1)); // Progressive delay
+          }, 2000 * (retryCount + 1));
         }
       }
     });
     
-    // Enhanced HTTP/2 protocol error handling
+    // Enhanced promise rejection handling
     window.addEventListener('unhandledrejection', function(e) {
-      console.warn('Promise rejection (possibly HTTP/2 related):', e.reason);
-      if (e.reason && e.reason.toString().includes('HTTP2_PROTOCOL_ERROR')) {
-        var retryCount = parseInt(sessionStorage.getItem('http2RetryCount') || '0');
-        if (retryCount < 1) {
-          sessionStorage.setItem('http2RetryCount', (retryCount + 1).toString());
-          setTimeout(() => {
-            console.log('Reloading due to HTTP/2 protocol error...');
-            window.location.reload(true);
-          }, 3000);
-        }
+      console.warn('Promise rejection detected:', e.reason);
+      const reasonStr = e.reason ? e.reason.toString() : '';
+      
+      if (reasonStr.includes('HTTP2_PROTOCOL_ERROR') || 
+          reasonStr.includes('net::ERR_HTTP2_PROTOCOL_ERROR') ||
+          reasonStr.includes('Protocol error')) {
+        handleHTTP2Error();
       }
     });
 
     // Clear retry counts on successful load
     window.addEventListener('load', function() {
+      console.log('Page loaded successfully');
       sessionStorage.removeItem('resourceRetryCount');
       sessionStorage.removeItem('http2RetryCount');
       
@@ -210,18 +309,50 @@
       }
     });
     
-    // Timeout fallback for mobile devices
+    // Enhanced timeout fallback for mobile devices
     if (isMobileDevice()) {
       setTimeout(() => {
         const wrapper = document.getElementById('wrapper');
         if (wrapper && wrapper.children.length === 0) {
           console.warn('App not loaded after timeout on mobile device');
-          const fallback = document.getElementById('mobile-fallback');
-          if (fallback) {
-            fallback.style.display = 'block';
+          
+          // Check if we're on somee.com and likely experiencing HTTP/2 issues
+          if (isSomeeHosting()) {
+            console.warn('Detected timeout on somee.com mobile - likely HTTP/2 issue');
+            handleHTTP2Error();
+          } else {
+            showMobileFallback();
           }
         }
-      }, 10000); // 10 second timeout
+      }, 8000); // Reduced timeout for faster response
+    }
+    
+    // Initialize HTTP/2 error detection
+    setupHTTP2ErrorDetection();
+    
+    // Register service worker for better caching and network resilience
+    if ('serviceWorker' in navigator && isSomeeHosting()) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+          console.log('Service Worker registered successfully:', registration.scope);
+        })
+        .catch(function(error) {
+          console.log('Service Worker registration failed:', error);
+        });
+    }
+    
+    // Monitor for console errors that might indicate HTTP/2 issues
+    if (isSomeeHosting() && isMobileDevice()) {
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const errorMsg = args.join(' ');
+        if (errorMsg.includes('HTTP2_PROTOCOL_ERROR') || 
+            errorMsg.includes('net::ERR_HTTP2_PROTOCOL_ERROR')) {
+          console.log('Console error detected HTTP/2 issue');
+          handleHTTP2Error();
+        }
+        return originalConsoleError.apply(console, args);
+      };
     }
   </script>
 
