@@ -44,6 +44,8 @@ const Ingreso = () => {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [verModal, setVerModal] = useState(false);
   const [modoSoloLectura, setModoSoloLectura] = useState(false);
+  const [modoEdicionDescripcion, setModoEdicionDescripcion] = useState(false);
+
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -168,6 +170,7 @@ const Ingreso = () => {
       fechaRegistro: data.fechaRegistro,
     });
     setModoSoloLectura(false);
+    setModoEdicionDescripcion(true);
     setVerModal(!verModal);
   };
 
@@ -177,12 +180,14 @@ const Ingreso = () => {
       monto: parseFloat(data.monto) || 0,
     });
     setModoSoloLectura(true);
+    setModoEdicionDescripcion(false);
     setVerModal(!verModal);
   };
 
   const cerrarModal = () => {
     setIngreso(modeloIngreso);
     setModoSoloLectura(false);
+    setModoEdicionDescripcion(false);
     setVerModal(!verModal);
   };
 
@@ -354,13 +359,7 @@ const Ingreso = () => {
             <i className="fas fa-pen-alt"></i>
           </Button>
 
-          <Button
-            color="danger"
-            size="sm"
-            onClick={() => eliminarIngreso(row.idIngreso)}
-          >
-            <i className="fas fa-trash-alt"></i>
-          </Button>
+          
         </>
       ),
     },
@@ -401,7 +400,10 @@ const Ingreso = () => {
                   <Button
                     color="success"
                     size="sm"
-                    onClick={() => setVerModal(!verModal)}
+                    onClick={() => {
+                      setVerModal(!verModal)
+                      setModoEdicionDescripcion(false)
+                    }}
                   >
                     <i className="fas fa-plus-circle mr-2"></i>
                     Nuevo Ingreso
@@ -411,22 +413,7 @@ const Ingreso = () => {
             </CardHeader>
             <CardBody>
               <Row className="mb-3">
-                <Col sm="2" className="mb-3 my-sm-0">
-                  <Input
-                    type="select"
-                    value={statusFilter}
-                    onChange={handleStatusFilter}
-                    bsSize="sm"
-                    style={{
-                      border: "2px solid #4e73df",
-                      borderRadius: "5px",
-                    }}
-                  >
-                    <option value="todos">Todos</option>
-                    <option value="activos">Activos</option>
-                    <option value="inactivos">Inactivos</option>
-                  </Input>
-                </Col>
+                
                 <Col sm="3" className="mb-3 my-sm-0">
                   <Input
                     type="text"
@@ -518,7 +505,7 @@ const Ingreso = () => {
                     step="0.01"
                     min="0"
                     required
-                    readOnly={modoSoloLectura}
+                    readOnly={modoSoloLectura || modoEdicionDescripcion}
                   />
                 </FormGroup>
               </Col>
@@ -531,7 +518,7 @@ const Ingreso = () => {
                     name="tipoPago"
                     onChange={handleChange}
                     value={ingreso.tipoPago}
-                    disabled={modoSoloLectura}
+                    disabled={modoSoloLectura || modoEdicionDescripcion}
                   >
                     <option value="Efectivo">Efectivo</option>
                     <option value="Transferencia">Transferencia</option>
@@ -550,7 +537,7 @@ const Ingreso = () => {
                     name="tipoDinero"
                     onChange={handleChange}
                     value={ingreso.tipoDinero}
-                    disabled={modoSoloLectura || ingreso.tipoPago === "Tarjeta"}
+                    disabled={modoSoloLectura || ingreso.tipoPago === "Tarjeta" || modoEdicionDescripcion}
                   >
                     <option value="Cordobas">Cordobas</option>
                     <option value="Dolares">Dolares</option>
@@ -577,7 +564,7 @@ const Ingreso = () => {
                       }}
                       value={ingreso.esActivo ? "true" : "false"}
                       disabled={
-                        modoSoloLectura || ingreso.tipoPago === "Tarjeta"
+                        modoSoloLectura || ingreso.tipoPago === "Tarjeta" || modoEdicionDescripcion
                       }
                     >
                       <option value="true">Activo</option>
@@ -605,7 +592,7 @@ const Ingreso = () => {
                         });
                       }}
                       value={ingreso.esActivo ? "true" : "false"}
-                      disabled={modoSoloLectura}
+                      disabled={modoSoloLectura || modoEdicionDescripcion}
                     >
                       <option value="true">Activo</option>
                       <option value="false">Inactivo</option>
